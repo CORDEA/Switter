@@ -9,6 +9,7 @@
     tools:context=".LoginActivity">
 
     <Button
+        android:id="@+id/button"
         android:text="@string/start"
         android:textSize="40sp"
         android:textColor="@android:color/white"
