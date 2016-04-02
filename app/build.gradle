@@ -1,4 +1,27 @@
+buildscript {
+    repositories {
+        maven { url 'https://maven.fabric.io/public' }
+    }
+
+    dependencies {
+        classpath 'io.fabric.tools:gradle:1.+'
+    }
+}
 apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
+
+repositories {
+    maven { url 'https://maven.fabric.io/public' }
+}
+
+apply plugin: 'io.fabric'
+
+repositories {
+    maven { url 'https://maven.fabric.io/public' }
+}
+
+Properties properties = new Properties();
+properties.load(file("fabric.properties").newDataInputStream())
 
 android {
     compileSdkVersion 23
@@ -10,6 +33,16 @@ android {
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
+    }
+    productFlavors {
+        dev {
+            buildConfigField "String", "CONSUMER_KEY", "\"${properties.getProperty("consumerKey")}\""
+            buildConfigField "String", "CONSUMER_SECRET", "\"${properties.getProperty("consumerSecret")}\""
+        }
+        prod {
+            buildConfigField "String", "CONSUMER_KEY", "\"${properties.getProperty("consumerKey")}\""
+            buildConfigField "String", "CONSUMER_SECRET", "\"${properties.getProperty("consumerSecret")}\""
+        }
     }
     buildTypes {
         release {
@@ -30,4 +63,7 @@ dependencies {
     compile 'com.squareup.retrofit2:retrofit:2.0.0'
     compile 'com.squareup.retrofit2:converter-gson:2.0.0'
     compile 'com.google.code.gson:gson:2.6.2'
+    compile('com.twitter.sdk.android:twitter:1.13.0@aar') {
+        transitive = true;
+    }
 }
