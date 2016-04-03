@@ -8,11 +8,19 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ListView;
 
+import com.twitter.sdk.android.core.Callback;
+import com.twitter.sdk.android.core.Result;
+import com.twitter.sdk.android.core.TwitterApiClient;
+import com.twitter.sdk.android.core.TwitterCore;
+import com.twitter.sdk.android.core.TwitterException;
+import com.twitter.sdk.android.core.models.Tweet;
+import com.twitter.sdk.android.core.services.StatusesService;
+
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import jp.cordea.switter.api.response.HomeTimeline;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,7 +44,22 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        MainListAdapter adapter = new MainListAdapter(this, new MainList[]{});
+        final MainListAdapter adapter = new MainListAdapter(this, new ArrayList<Tweet>());
+
+        TwitterApiClient client = TwitterCore.getInstance().getApiClient();
+        StatusesService service = client.getStatusesService();
+        service.homeTimeline(50, null, null, false, false, false, false, new Callback<List<Tweet>>() {
+            @Override
+            public void success(Result<List<Tweet>> result) {
+                adapter.addItems(result.data);
+            }
+
+            @Override
+            public void failure(TwitterException e) {
+                e.printStackTrace();
+            }
+        });
+
         listView.setAdapter(adapter);
     }
 

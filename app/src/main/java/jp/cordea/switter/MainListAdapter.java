@@ -8,24 +8,35 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import com.twitter.sdk.android.core.models.Tweet;
+
+import java.util.List;
+
 /**
  * Created by Yoshihiro Tanaka on 16/03/30.
  */
-public class MainListAdapter extends ArrayAdapter<MainList> {
+public class MainListAdapter extends ArrayAdapter<Tweet> {
 
-    public MainListAdapter(Context context, MainList[] objects) {
-        super(context, R.layout.main_list_item, objects);
+    private List<Tweet> tweets;
+
+    public MainListAdapter(Context context, List<Tweet> tweets) {
+        super(context, R.layout.main_list_item, tweets);
+        this.tweets = tweets;
+    }
+
+    public void addItems(List<Tweet> tweets) {
+        this.tweets.addAll(tweets);
+        notifyDataSetChanged();
     }
 
     @Override
-    public MainList getItem(int position) {
-        return super.getItem(position);
+    public Tweet getItem(int position) {
+        return tweets.get(position);
     }
 
     @Override
     public int getCount() {
-        return 6;
-//        return super.getCount();
+        return tweets.size();
     }
 
     @Override
