@@ -8,13 +8,19 @@
     android:fitsSystemWindows="true"
     tools:context=".LoginActivity">
 
-    <Button
-        android:id="@+id/button"
-        android:text="@string/start"
-        android:textSize="40sp"
-        android:textColor="@android:color/white"
-        android:background="@color/colorAccent"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+    <!--<Button-->
+        <!--android:id="@+id/button"-->
+        <!--android:text="@string/start"-->
+        <!--android:textSize="40sp"-->
+        <!--android:textColor="@android:color/white"-->
+        <!--android:background="@color/colorAccent"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent" />-->
+
+    <com.twitter.sdk.android.core.identity.TwitterLoginButton
+        android:id="@+id/twitter_login_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"/>
 
 </android.support.design.widget.CoordinatorLayout>
