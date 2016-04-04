@@ -13,4 +13,11 @@
     tools:context="jp.cordea.switter.PostActivity"
     tools:showIn="@layout/activity_post">
 
+    <EditText
+        android:id="@+id/edit_text"
+        android:maxLines="0"
+        android:layout_marginBottom="?attr/actionBarSize"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
 </RelativeLayout>
