@@ -4,4 +4,7 @@
     <string name="start">Start.</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="title_activity_post">PostActivity</string>
+    <string name="minute_format">%d分</string>
+    <string name="hour_format">%d時間</string>
+    <string name="day_format">%d日</string>
 </resources>
