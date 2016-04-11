@@ -1,6 +1,13 @@
 package jp.cordea.switter;
 
 import android.content.Context;
+import android.graphics.Typeface;
+import android.support.v4.content.ContextCompat;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.AbsoluteSizeSpan;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,7 +57,6 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
         View view = convertView == null ? LayoutInflater.from(getContext()).inflate(R.layout.main_list_item, null, false) : convertView;
 
         TextView nameTextView = (TextView) view.findViewById(R.id.user_name);
-        TextView idTextView = (TextView) view.findViewById(R.id.user_id);
         TextView dateTextView = (TextView) view.findViewById(R.id.date);
         TextView contentTextView = (TextView) view.findViewById(R.id.content);
 
@@ -59,9 +65,22 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
         ImageView retweetButton = (ImageView) view.findViewById(R.id.retweet_button);
         ImageView replyButton = (ImageView) view.findViewById(R.id.reply_button);
 
+        int color = ContextCompat.getColor(getContext(), R.color.colorPrimaryText);
+        int secColor = ContextCompat.getColor(getContext(), R.color.colorSecondaryText);
+
+        float size = getContext().getResources().getDimension(R.dimen.user_name_text_size);
+        float secSize = getContext().getResources().getDimension(R.dimen.user_id_text_size);
+
         final Tweet tweet = tweets.get(position);
-        nameTextView.setText(tweet.user.name);
-        idTextView.setText(tweet.user.screenName);
+        String string = tweet.user.name + " @" + tweet.user.screenName;
+        SpannableString spannableString = new SpannableString(string);
+        int length = tweet.user.name.length();
+        spannableString.setSpan(new AbsoluteSizeSpan((int) size), 0, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannableString.setSpan(new AbsoluteSizeSpan((int) secSize), length + 1, string.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannableString.setSpan(new ForegroundColorSpan(color), 0, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannableString.setSpan(new ForegroundColorSpan(secColor), length + 1, string.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannableString.setSpan(new StyleSpan(Typeface.BOLD), 0, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        nameTextView.setText(spannableString);
         DateTime time = parseTwitterDate(tweet.createdAt);
         DateTime now = new DateTime();
         Duration duration = new Interval(time, now).toDuration();

@@ -8,28 +8,17 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
-import com.twitter.sdk.android.core.TwitterAuthConfig;
 import com.twitter.sdk.android.core.TwitterException;
 import com.twitter.sdk.android.core.TwitterSession;
-import com.twitter.sdk.android.core.identity.TwitterAuthClient;
 import com.twitter.sdk.android.core.identity.TwitterLoginButton;
-import com.twitter.sdk.android.core.models.Tweet;
-import com.twitter.sdk.android.core.models.User;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import io.fabric.sdk.android.Fabric;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -65,25 +54,23 @@ public class LoginActivity extends AppCompatActivity {
         });
 
 
-        addDemo(R.id.demo1, "hogehoge", "_Cordea", "");
-        addDemo(R.id.demo2, "hogehoge", "_Cordea", "");
-        addDemo(R.id.demo3, "hogehoge", "_Cordea", "");
-        addDemo(R.id.demo4, "hogehoge", "_Cordea", "");
-        addDemo(R.id.demo5, "hogehoge", "_Cordea", "");
-        addDemo(R.id.demo6, "hogehoge", "_Cordea", "");
+        addDemo(R.id.demo1, "hogehoge", "_Cordea");
+        addDemo(R.id.demo2, "hogehoge", "_Cordea");
+        addDemo(R.id.demo3, "hogehoge", "_Cordea");
+        addDemo(R.id.demo4, "hogehoge", "_Cordea");
+        addDemo(R.id.demo5, "hogehoge", "_Cordea");
+        addDemo(R.id.demo6, "hogehoge", "_Cordea");
     }
 
-    private void addDemo(int id, String text, String username, String userid) {
+    private void addDemo(int id, String text, String username) {
         View view = findViewById(id);
         assert view != null;
 
         TextView nameTextView = (TextView) view.findViewById(R.id.user_name);
-        TextView idTextView = (TextView) view.findViewById(R.id.user_id);
         TextView dateTextView = (TextView) view.findViewById(R.id.date);
         TextView contentTextView = (TextView) view.findViewById(R.id.content);
 
         nameTextView.setText(username);
-        idTextView.setText(userid);
         contentTextView.setText(text);
     }
 
