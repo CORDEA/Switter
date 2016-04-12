@@ -1,6 +1,12 @@
 package jp.cordea.switter;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapShader;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.support.v4.content.ContextCompat;
 import android.text.SpannableString;
@@ -15,6 +21,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Transformation;
 import com.twitter.sdk.android.core.models.Tweet;
 
 import org.joda.time.DateTime;
@@ -56,6 +64,7 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = convertView == null ? LayoutInflater.from(getContext()).inflate(R.layout.main_list_item, null, false) : convertView;
 
+        ImageView userImageView = (ImageView) view.findViewById(R.id.user_thumbnail);
         TextView nameTextView = (TextView) view.findViewById(R.id.user_name);
         TextView dateTextView = (TextView) view.findViewById(R.id.date);
         TextView contentTextView = (TextView) view.findViewById(R.id.content);
@@ -71,8 +80,40 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
         float size = getContext().getResources().getDimension(R.dimen.user_name_text_size);
         float secSize = getContext().getResources().getDimension(R.dimen.user_id_text_size);
 
+        final float thumbnailRound = getContext().getResources().getDimension(R.dimen.user_thumbnail_round);
+
         final Tweet tweet = tweets.get(position);
         String string = tweet.user.name + " @" + tweet.user.screenName;
+        Picasso.with(getContext())
+                .load(tweet.user.profileImageUrl)
+                .transform(new Transformation() {
+                    @Override
+                    public Bitmap transform(Bitmap source) {
+                        int size = source.getWidth();
+
+                        Bitmap out = Bitmap.createBitmap(size, size, source.getConfig());
+                        Canvas canvas = new Canvas(out);
+
+                        Paint paint = new Paint();
+                        BitmapShader shader = new BitmapShader(source, BitmapShader.TileMode.CLAMP, BitmapShader.TileMode.CLAMP);
+                        paint.setShader(shader);
+                        paint.setAntiAlias(true);
+
+                        Rect rect = new Rect(0, 0, size, size);
+                        RectF rectF = new RectF(rect);
+                        canvas.drawRoundRect(rectF, thumbnailRound, thumbnailRound, paint);
+
+                        source.recycle();
+
+                        return out;
+                    }
+
+                    @Override
+                    public String key() {
+                        return "round";
+                    }
+                })
+                .into(userImageView);
         SpannableString spannableString = new SpannableString(string);
         int length = tweet.user.name.length();
         spannableString.setSpan(new AbsoluteSizeSpan((int) size), 0, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);

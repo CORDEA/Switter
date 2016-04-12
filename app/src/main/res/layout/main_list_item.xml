@@ -6,8 +6,10 @@
               android:layout_height="wrap_content">
 
     <ImageView
-        android:layout_width="64dp"
-        android:layout_height="64dp"/>
+        android:id="@+id/user_thumbnail"
+        android:layout_marginEnd="@dimen/user_thumbnail_end_margin"
+        android:layout_width="@dimen/user_thumbnail_size"
+        android:layout_height="@dimen/user_thumbnail_size"/>
 
     <LinearLayout
         android:orientation="vertical"
@@ -21,8 +23,7 @@
 
             <TextView
                 android:id="@+id/user_name"
-                android:textSize="16sp"
-                android:layout_marginEnd="60dp"
+                android:layout_marginEnd="@dimen/tweet_post_date_width"
                 android:maxLines="1"
                 android:ellipsize="end"
                 android:layout_width="match_parent"
@@ -34,8 +35,7 @@
                 android:textSize="14sp"
                 android:layout_gravity="end"
                 android:gravity="end"
-                android:layout_marginStart="10dp"
-                android:layout_width="60dp"
+                android:layout_width="@dimen/tweet_post_date_width"
                 android:layout_height="match_parent"/>
 
         </FrameLayout>
