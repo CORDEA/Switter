@@ -1,6 +1,7 @@
 package jp.cordea.switter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
@@ -32,6 +33,11 @@ import org.joda.time.format.DateTimeFormat;
 
 import java.util.List;
 import java.util.Locale;
+
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
+import jp.cordea.switter.realm.Favorite;
+import jp.cordea.switter.realm.LocalTweet;
 
 /**
  * Created by Yoshihiro Tanaka on 16/03/30.
@@ -138,6 +144,42 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
 
         dateTextView.setText(String.format(getContext().getResources().getString(format), display));
         contentTextView.setText(tweet.text);
+
+        Realm realm = Realm.getDefaultInstance();
+        if (realm.where(Favorite.class).equalTo("tweetId", tweet.id).count() == 0) {
+        }
+
+        starButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Realm realm = Realm.getDefaultInstance();
+                realm.executeTransaction(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        Favorite favorite = realm.createObject(Favorite.class);
+                        favorite.setUserId(tweet.user.id);
+                        favorite.setTweetId(tweet.id);
+                    }
+                });
+                realm.close();
+            }
+        });
+
+        retweetButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = PostActivity.creaateIntent(getContext(), PostType.Retweet);
+                getContext().startActivity(intent);
+            }
+        });
+
+        replyButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = PostActivity.creaateIntent(getContext(), PostType.Reply);
+                getContext().startActivity(intent);
+            }
+        });
 
         return view;
     }
