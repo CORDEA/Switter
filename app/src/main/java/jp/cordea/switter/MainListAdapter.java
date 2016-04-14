@@ -35,9 +35,8 @@ import java.util.List;
 import java.util.Locale;
 
 import io.realm.Realm;
-import io.realm.RealmConfiguration;
 import jp.cordea.switter.realm.Favorite;
-import jp.cordea.switter.realm.LocalTweet;
+import jp.cordea.switter.realm.LocalRetweet;
 
 /**
  * Created by Yoshihiro Tanaka on 16/03/30.
@@ -75,9 +74,10 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
         TextView dateTextView = (TextView) view.findViewById(R.id.date);
         TextView contentTextView = (TextView) view.findViewById(R.id.content);
 
-        ImageView moreButton = (ImageView) view.findViewById(R.id.more_button);
-        ImageView starButton = (ImageView) view.findViewById(R.id.star_button);
+        ImageView favoriteButton = (ImageView) view.findViewById(R.id.favorite_button);
+        TextView favoriteTextView = (TextView) view.findViewById(R.id.favorite_text_view);
         ImageView retweetButton = (ImageView) view.findViewById(R.id.retweet_button);
+        TextView retweetTextView = (TextView) view.findViewById(R.id.retweet_text_view);
         ImageView replyButton = (ImageView) view.findViewById(R.id.reply_button);
 
         int color = ContextCompat.getColor(getContext(), R.color.colorPrimaryText);
@@ -145,11 +145,18 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
         dateTextView.setText(String.format(getContext().getResources().getString(format), display));
         contentTextView.setText(tweet.text);
 
-        Realm realm = Realm.getDefaultInstance();
-        if (realm.where(Favorite.class).equalTo("tweetId", tweet.id).count() == 0) {
-        }
+        int favorites = tweet.favoriteCount;
+        int retweets = tweet.retweetCount;
 
-        starButton.setOnClickListener(new View.OnClickListener() {
+        Realm realm = Realm.getDefaultInstance();
+        boolean isFavorite = realm.where(Favorite.class).equalTo("tweetId", tweet.id).count() != 0;
+        boolean isRetweet = realm.where(LocalRetweet.class).equalTo("tweetId", tweet.id).count() != 0;
+        realm.close();
+
+        if (isFavorite) {
+            ++favorites;
+        } else {
+            favoriteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Realm realm = Realm.getDefaultInstance();
@@ -164,14 +171,22 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
                 realm.close();
             }
         });
+        }
 
-        retweetButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = PostActivity.creaateIntent(getContext(), PostType.Retweet);
-                getContext().startActivity(intent);
-            }
-        });
+        if (isRetweet) {
+            ++retweets;
+        } else {
+            retweetButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // TODO
+                }
+            });
+        }
+        realm.close();
+
+        favoriteTextView.setText(String.format("%d", favorites));
+        retweetTextView.setText(String.format("%d", retweets));
 
         replyButton.setOnClickListener(new View.OnClickListener() {
             @Override
