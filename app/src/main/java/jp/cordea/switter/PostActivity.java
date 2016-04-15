@@ -10,8 +10,12 @@ import android.text.Editable;
 import android.view.View;
 import android.widget.EditText;
 
+import com.twitter.sdk.android.core.models.Tweet;
+
 import butterknife.Bind;
 import io.realm.Realm;
+import jp.cordea.switter.realm.Favorite;
+import jp.cordea.switter.realm.LocalRetweet;
 import jp.cordea.switter.realm.LocalTweet;
 
 public class PostActivity extends AppCompatActivity {
@@ -40,7 +44,7 @@ public class PostActivity extends AppCompatActivity {
         setContentView(R.layout.activity_post);
         setSupportActionBar(toolbar);
 
-        PostType type = PostType.valueOf(getIntent().getStringExtra(POST_TYPE_KEY));
+        final PostType type = PostType.valueOf(getIntent().getStringExtra(POST_TYPE_KEY));
 
         // TODO: insert text
 
@@ -49,20 +53,30 @@ public class PostActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Editable editable = editText.getText();
                 if (editable != null && editable.length() > 0) {
-                    final String text = editable.toString();
-                    // TODO
-                    Realm realm = Realm.getDefaultInstance();
-                    realm.executeTransaction(new Realm.Transaction() {
-                        @Override
-                        public void execute(Realm realm) {
-                            LocalTweet localTweet = realm.createObject(LocalTweet.class);
-                            localTweet.setEpoch(System.currentTimeMillis());
-                            localTweet.setText(text);
-                        }
-                    });
+                    saveTweet(editable.toString(), type);
                 }
             }
         });
     }
 
+    private void saveTweet(String text, PostType type) {
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        switch (type) {
+            case Tweet:
+                LocalTweet localTweet = realm.createObject(LocalTweet.class);
+                localTweet.setEpoch(System.currentTimeMillis());
+                localTweet.setText(text);
+                break;
+            case Reply:
+                localTweet = realm.createObject(LocalTweet.class);
+                localTweet.setEpoch(System.currentTimeMillis());
+                localTweet.setText(text);
+                localTweet.setReply(true);
+                // TODO
+                break;
+        }
+        realm.commitTransaction();
+        realm.close();
+    }
 }

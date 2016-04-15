@@ -20,9 +20,6 @@ public class LocalTweet extends RealmObject {
     @Required
     private String text;
 
-    @Required
-    private String createdAt;
-
     private boolean isReply;
 
     private long replyTweetId;
