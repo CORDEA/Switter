@@ -37,6 +37,7 @@ import java.util.Locale;
 import io.realm.Realm;
 import jp.cordea.switter.realm.Favorite;
 import jp.cordea.switter.realm.LocalRetweet;
+import jp.cordea.switter.realm.LocalTweet;
 
 /**
  * Created by Yoshihiro Tanaka on 16/03/30.
@@ -199,6 +200,7 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
         return view;
     }
 
+    @Deprecated
     private DateTime parseTwitterDate(String twitterDate) {
         return DateTime.parse(twitterDate, DateTimeFormat.forPattern("EEE MMM dd HH:mm:ss Z yyyy").withLocale(Locale.ENGLISH));
     }

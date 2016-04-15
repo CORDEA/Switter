@@ -10,12 +10,8 @@ import android.text.Editable;
 import android.view.View;
 import android.widget.EditText;
 
-import com.twitter.sdk.android.core.models.Tweet;
-
 import butterknife.Bind;
 import io.realm.Realm;
-import jp.cordea.switter.realm.Favorite;
-import jp.cordea.switter.realm.LocalRetweet;
 import jp.cordea.switter.realm.LocalTweet;
 
 public class PostActivity extends AppCompatActivity {
