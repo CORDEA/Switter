@@ -31,10 +31,12 @@ import org.joda.time.Duration;
 import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
 import io.realm.Realm;
+import io.realm.RealmResults;
 import jp.cordea.switter.realm.Favorite;
 import jp.cordea.switter.realm.LocalRetweet;
 import jp.cordea.switter.realm.LocalTweet;
@@ -42,22 +44,25 @@ import jp.cordea.switter.realm.LocalTweet;
 /**
  * Created by Yoshihiro Tanaka on 16/03/30.
  */
-public class MainListAdapter extends ArrayAdapter<Tweet> {
+public class MainListAdapter extends ArrayAdapter<LocalTweet> {
 
-    private List<Tweet> tweets;
+    private List<LocalTweet> tweets;
 
-    public MainListAdapter(Context context, List<Tweet> tweets) {
+    public MainListAdapter(Context context, List<LocalTweet> tweets) {
         super(context, R.layout.main_list_item, tweets);
         this.tweets = tweets;
     }
 
-    public void addItems(List<Tweet> tweets) {
-        this.tweets.addAll(tweets);
-        notifyDataSetChanged();
+    @Override
+    public void notifyDataSetChanged() {
+        Realm realm = Realm.getDefaultInstance();
+        RealmResults<LocalTweet> realmResults = realm.allObjects(LocalTweet.class);
+        tweets.addAll(realm.copyFromRealm(realmResults));
+        super.notifyDataSetChanged();
     }
 
     @Override
-    public Tweet getItem(int position) {
+    public LocalTweet getItem(int position) {
         return tweets.get(position);
     }
 
@@ -89,10 +94,10 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
 
         final float thumbnailRound = getContext().getResources().getDimension(R.dimen.user_thumbnail_round);
 
-        final Tweet tweet = tweets.get(position);
-        String string = tweet.user.name + " @" + tweet.user.screenName;
+        final LocalTweet tweet = tweets.get(position);
+        String string = tweet.getUserName() + " @" + tweet.getUserScreenName();
         Picasso.with(getContext())
-                .load(tweet.user.profileImageUrl)
+                .load(tweet.getProfileImageUrl())
                 .transform(new Transformation() {
                     @Override
                     public Bitmap transform(Bitmap source) {
@@ -122,14 +127,14 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
                 })
                 .into(userImageView);
         SpannableString spannableString = new SpannableString(string);
-        int length = tweet.user.name.length();
+        int length = tweet.getUserName().length();
         spannableString.setSpan(new AbsoluteSizeSpan((int) size), 0, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         spannableString.setSpan(new AbsoluteSizeSpan((int) secSize), length + 1, string.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         spannableString.setSpan(new ForegroundColorSpan(color), 0, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         spannableString.setSpan(new ForegroundColorSpan(secColor), length + 1, string.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         spannableString.setSpan(new StyleSpan(Typeface.BOLD), 0, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         nameTextView.setText(spannableString);
-        DateTime time = parseTwitterDate(tweet.createdAt);
+        DateTime time = new DateTime(tweet.getEpoch());
         DateTime now = new DateTime();
         Duration duration = new Interval(time, now).toDuration();
         long display = duration.getStandardMinutes();
@@ -144,14 +149,14 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
         }
 
         dateTextView.setText(String.format(getContext().getResources().getString(format), display));
-        contentTextView.setText(tweet.text);
+        contentTextView.setText(tweet.getText());
 
-        int favorites = tweet.favoriteCount;
-        int retweets = tweet.retweetCount;
+        int favorites = tweet.getFavoriteCount();
+        int retweets = tweet.getRetweetCount();
 
         Realm realm = Realm.getDefaultInstance();
-        boolean isFavorite = realm.where(Favorite.class).equalTo("tweetId", tweet.id).count() != 0;
-        boolean isRetweet = realm.where(LocalRetweet.class).equalTo("tweetId", tweet.id).count() != 0;
+        boolean isFavorite = realm.where(Favorite.class).equalTo("tweetId", tweet.getTweetId()).count() != 0;
+        boolean isRetweet = realm.where(LocalRetweet.class).equalTo("tweetId", tweet.getTweetId()).count() != 0;
         realm.close();
 
         if (isFavorite) {
@@ -165,8 +170,8 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
                     @Override
                     public void execute(Realm realm) {
                         Favorite favorite = realm.createObject(Favorite.class);
-                        favorite.setUserId(tweet.user.id);
-                        favorite.setTweetId(tweet.id);
+                        favorite.setUserId(tweet.getUserId());
+                        favorite.setTweetId(tweet.getTweetId());
                     }
                 });
                 realm.close();
@@ -198,10 +203,5 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
         });
 
         return view;
-    }
-
-    @Deprecated
-    private DateTime parseTwitterDate(String twitterDate) {
-        return DateTime.parse(twitterDate, DateTimeFormat.forPattern("EEE MMM dd HH:mm:ss Z yyyy").withLocale(Locale.ENGLISH));
     }
 }

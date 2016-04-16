@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        final MainListAdapter adapter = new MainListAdapter(this, new ArrayList<Tweet>());
+        final MainListAdapter adapter = new MainListAdapter(this, new ArrayList<LocalTweet>());
 
         TwitterApiClient client = TwitterCore.getInstance().getApiClient();
         StatusesService service = client.getStatusesService();
@@ -71,11 +71,18 @@ public class MainActivity extends AppCompatActivity {
                             DateTime dateTime = parseTwitterDate(tweet.createdAt);
                             localTweet.setEpoch(dateTime.getMillis());
                             localTweet.setText(tweet.text);
+                            localTweet.setTweetId(tweet.id);
+                            localTweet.setUserId(tweet.user.id);
+                            localTweet.setUserName(tweet.user.name);
+                            localTweet.setUserScreenName(tweet.user.screenName);
+                            localTweet.setFavoriteCount(tweet.favoriteCount);
+                            localTweet.setRetweetCount(tweet.retweetCount);
+                            localTweet.setProfileImageUrl(tweet.user.profileImageUrl);
                         }
                     }
                 });
                 realm.close();
-                adapter.addItems(result.data);
+                adapter.notifyDataSetChanged();
             }
 
             @Override
