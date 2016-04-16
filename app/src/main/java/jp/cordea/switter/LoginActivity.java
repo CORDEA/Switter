@@ -13,12 +13,16 @@ import android.widget.Toast;
 
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
+import com.twitter.sdk.android.core.TwitterCore;
 import com.twitter.sdk.android.core.TwitterException;
 import com.twitter.sdk.android.core.TwitterSession;
 import com.twitter.sdk.android.core.identity.TwitterLoginButton;
+import com.twitter.sdk.android.core.models.User;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import io.realm.Realm;
+import jp.cordea.switter.realm.ActiveUser;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -39,13 +43,8 @@ public class LoginActivity extends AppCompatActivity {
             public void success(Result<TwitterSession> result) {
                 Intent intent = new Intent(context, MainActivity.class);
                 startActivity(intent);
-                // The TwitterSession is also available through:
-                // Twitter.getInstance().core.getSessionManager().getActiveSession()
                 TwitterSession session = result.data;
-                // TODO: Remove toast and use the TwitterSession's userID
-                // with your app's user model
-                String msg = "@" + session.getUserName() + " logged in! (#" + session.getUserId() + ")";
-                Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+                getOwnData(session);
             }
             @Override
             public void failure(TwitterException exception) {
@@ -60,6 +59,33 @@ public class LoginActivity extends AppCompatActivity {
         addDemo(R.id.demo4, "hogehoge", "_Cordea");
         addDemo(R.id.demo5, "hogehoge", "_Cordea");
         addDemo(R.id.demo6, "hogehoge", "_Cordea");
+    }
+
+    private void getOwnData(TwitterSession session) {
+        UsersApiClient client = new UsersApiClient(session);
+        UsersService service = client.getUsersService();
+        service.show(session.getUserId(), new Callback<User>() {
+            @Override
+            public void success(final Result<User> result) {
+                Realm realm = Realm.getDefaultInstance();
+                final User user = result.data;
+                realm.executeTransaction(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        ActiveUser activeUser = realm.createObject(ActiveUser.class);
+                        activeUser.setProfileImageUrl(user.profileImageUrl);
+                        activeUser.setId(user.id);
+                        activeUser.setScreenName(user.screenName);
+                        activeUser.setName(user.name);
+                    }
+                });
+                realm.close();
+            }
+
+            @Override
+            public void failure(TwitterException e) {
+            }
+        });
     }
 
     private void addDemo(int id, String text, String username) {
