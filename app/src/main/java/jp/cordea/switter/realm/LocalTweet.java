@@ -14,13 +14,27 @@ import lombok.Setter;
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class LocalTweet extends RealmObject {
-    @PrimaryKey
+
+    private long tweetId;
+
     private long epoch;
 
     @Required
     private String text;
 
+    private String profileImageUrl;
+
+    private long userId;
+
+    private String userName;
+
+    private String userScreenName;
+
     private boolean isReply;
 
     private long replyTweetId;
+
+    private int favoriteCount;
+
+    private int retweetCount;
 }
