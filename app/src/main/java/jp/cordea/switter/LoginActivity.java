@@ -69,16 +69,15 @@ public class LoginActivity extends AppCompatActivity {
             public void success(final Result<User> result) {
                 Realm realm = Realm.getDefaultInstance();
                 final User user = result.data;
-                realm.executeTransaction(new Realm.Transaction() {
-                    @Override
-                    public void execute(Realm realm) {
-                        ActiveUser activeUser = realm.createObject(ActiveUser.class);
-                        activeUser.setProfileImageUrl(user.profileImageUrl);
-                        activeUser.setId(user.id);
-                        activeUser.setScreenName(user.screenName);
-                        activeUser.setName(user.name);
-                    }
-                });
+                if (realm.where(ActiveUser.class).equalTo("id", user.id).count() == 0) {
+                    realm.beginTransaction();
+                    ActiveUser activeUser = realm.createObject(ActiveUser.class);
+                    activeUser.setProfileImageUrl(user.profileImageUrl);
+                    activeUser.setId(user.id);
+                    activeUser.setScreenName(user.screenName);
+                    activeUser.setName(user.name);
+                    realm.commitTransaction();
+                }
                 realm.close();
             }
 
