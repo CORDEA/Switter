@@ -24,19 +24,16 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Transformation;
-import com.twitter.sdk.android.core.models.Tweet;
 
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.Interval;
-import org.joda.time.format.DateTimeFormat;
 
-import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
+import io.realm.Sort;
 import jp.cordea.switter.realm.Favorite;
 import jp.cordea.switter.realm.LocalRetweet;
 import jp.cordea.switter.realm.LocalTweet;
@@ -56,7 +53,8 @@ public class MainListAdapter extends ArrayAdapter<LocalTweet> {
     @Override
     public void notifyDataSetChanged() {
         Realm realm = Realm.getDefaultInstance();
-        RealmResults<LocalTweet> realmResults = realm.allObjects(LocalTweet.class);
+        RealmResults<LocalTweet> realmResults = realm.where(LocalTweet.class).findAllSorted("epoch", Sort.DESCENDING);
+        tweets.clear();
         tweets.addAll(realm.copyFromRealm(realmResults));
         super.notifyDataSetChanged();
     }
@@ -197,7 +195,7 @@ public class MainListAdapter extends ArrayAdapter<LocalTweet> {
         replyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = PostActivity.creaateIntent(getContext(), PostType.Reply);
+                Intent intent = PostActivity.createIntent(getContext(), PostType.Reply, tweet.getTweetId());
                 getContext().startActivity(intent);
             }
         });
