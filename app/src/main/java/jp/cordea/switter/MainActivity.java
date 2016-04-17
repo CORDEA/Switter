@@ -70,26 +70,25 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void success(final Result<List<Tweet>> result) {
                 Realm realm = Realm.getDefaultInstance();
-                realm.executeTransaction(new Realm.Transaction() {
-                    @Override
-                    public void execute(Realm realm) {
-                        List<Tweet> tweets = result.data;
-                        for (int i = 0; i < tweets.size(); i++) {
-                            Tweet tweet = tweets.get(i);
-                            LocalTweet localTweet = realm.createObject(LocalTweet.class);
-                            DateTime dateTime = parseTwitterDate(tweet.createdAt);
-                            localTweet.setEpoch(dateTime.getMillis());
-                            localTweet.setText(tweet.text);
-                            localTweet.setTweetId(tweet.id);
-                            localTweet.setUserId(tweet.user.id);
-                            localTweet.setUserName(tweet.user.name);
-                            localTweet.setUserScreenName(tweet.user.screenName);
-                            localTweet.setFavoriteCount(tweet.favoriteCount);
-                            localTweet.setRetweetCount(tweet.retweetCount);
-                            localTweet.setProfileImageUrl(tweet.user.profileImageUrl);
-                        }
+                realm.beginTransaction();
+                List<Tweet> tweets = result.data;
+                for (int i = 0; i < tweets.size(); i++) {
+                    Tweet tweet = tweets.get(i);
+                    if (realm.where(LocalTweet.class).equalTo("tweetId", tweet.id).count() == 0) {
+                        LocalTweet localTweet = realm.createObject(LocalTweet.class);
+                        DateTime dateTime = parseTwitterDate(tweet.createdAt);
+                        localTweet.setEpoch(dateTime.getMillis());
+                        localTweet.setText(tweet.text);
+                        localTweet.setTweetId(tweet.id);
+                        localTweet.setUserId(tweet.user.id);
+                        localTweet.setUserName(tweet.user.name);
+                        localTweet.setUserScreenName(tweet.user.screenName);
+                        localTweet.setFavoriteCount(tweet.favoriteCount);
+                        localTweet.setRetweetCount(tweet.retweetCount);
+                        localTweet.setProfileImageUrl(tweet.user.profileImageUrl);
                     }
-                });
+                }
+                realm.commitTransaction();
                 realm.close();
                 adapter.notifyDataSetChanged();
             }
