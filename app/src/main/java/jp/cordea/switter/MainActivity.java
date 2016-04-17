@@ -53,9 +53,12 @@ public class MainActivity extends AppCompatActivity {
 
         setSupportActionBar(toolbar);
 
+        final Context context = this;
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Intent intent = PostActivity.createIntent(context, PostType.Tweet, -1);
+                startActivity(intent);
             }
         });
 
