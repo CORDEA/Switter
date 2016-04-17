@@ -1,8 +1,11 @@
 package jp.cordea.switter;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -35,6 +38,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Bind(R.id.fab)
     FloatingActionButton button;
+
+    @Bind(R.id.refresh_layout)
+    SwipeRefreshLayout swipeRefreshLayout;
 
     @Bind(R.id.list_view)
     ListView listView;
@@ -92,6 +98,14 @@ public class MainActivity extends AppCompatActivity {
         });
 
         listView.setAdapter(adapter);
+
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                adapter.notifyDataSetChanged();
+                swipeRefreshLayout.setRefreshing(false);
+            }
+        });
     }
 
     private DateTime parseTwitterDate(String twitterDate) {
