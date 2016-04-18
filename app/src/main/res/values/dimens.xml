@@ -6,9 +6,9 @@
 
     <dimen name="tweet_post_date_width">60dp</dimen>
     <dimen name="user_name_text_size">16sp</dimen>
-    <dimen name="user_id_text_size">15sp</dimen>
+    <dimen name="user_id_text_size">14sp</dimen>
 
     <dimen name="user_thumbnail_round">2dp</dimen>
     <dimen name="user_thumbnail_end_margin">10dp</dimen>
-    <dimen name="user_thumbnail_size">64dp</dimen>
+    <dimen name="user_thumbnail_size">56dp</dimen>
 </resources>
