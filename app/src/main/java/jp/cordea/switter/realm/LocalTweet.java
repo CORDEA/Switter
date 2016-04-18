@@ -15,6 +15,9 @@ import lombok.Setter;
 @EqualsAndHashCode(callSuper = false)
 public class LocalTweet extends RealmObject {
 
+    @PrimaryKey
+    private long id;
+
     private long tweetId;
 
     private long epoch;
@@ -31,6 +34,10 @@ public class LocalTweet extends RealmObject {
     private String userScreenName;
 
     private boolean isReply;
+
+    private boolean isFavorite;
+
+    private boolean isRetweet;
 
     private long replyTweetId;
 

@@ -4,10 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 
@@ -64,12 +64,27 @@ public class MainActivity extends AppCompatActivity {
 
         final MainListAdapter adapter = new MainListAdapter(this, new ArrayList<LocalTweet>());
 
+        getTweets(adapter, 50);
+
+        listView.setAdapter(adapter);
+
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                getTweets(adapter, 10);
+                swipeRefreshLayout.setRefreshing(false);
+            }
+        });
+    }
+
+    private void getTweets(final MainListAdapter adapter, int count) {
         TwitterApiClient client = TwitterCore.getInstance().getApiClient();
         StatusesService service = client.getStatusesService();
-        service.homeTimeline(50, null, null, false, false, false, false, new Callback<List<Tweet>>() {
+        service.homeTimeline(count, null, null, false, false, false, false, new Callback<List<Tweet>>() {
             @Override
             public void success(final Result<List<Tweet>> result) {
                 Realm realm = Realm.getDefaultInstance();
+                long maxId = realm.allObjects(LocalTweet.class).max("id").longValue();
                 realm.beginTransaction();
                 List<Tweet> tweets = result.data;
                 for (int i = 0; i < tweets.size(); i++) {
@@ -77,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
                     if (realm.where(LocalTweet.class).equalTo("tweetId", tweet.id).count() == 0) {
                         LocalTweet localTweet = realm.createObject(LocalTweet.class);
                         DateTime dateTime = parseTwitterDate(tweet.createdAt);
+                        localTweet.setId(maxId + 1);
                         localTweet.setEpoch(dateTime.getMillis());
                         localTweet.setText(tweet.text);
                         localTweet.setTweetId(tweet.id);
@@ -86,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
                         localTweet.setFavoriteCount(tweet.favoriteCount);
                         localTweet.setRetweetCount(tweet.retweetCount);
                         localTweet.setProfileImageUrl(tweet.user.profileImageUrl);
+                        Log.i("xxx", tweet.user.profileImageUrl);
                     }
                 }
                 realm.commitTransaction();
@@ -96,16 +113,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void failure(TwitterException e) {
                 e.printStackTrace();
-            }
-        });
-
-        listView.setAdapter(adapter);
-
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                adapter.notifyDataSetChanged();
-                swipeRefreshLayout.setRefreshing(false);
             }
         });
     }

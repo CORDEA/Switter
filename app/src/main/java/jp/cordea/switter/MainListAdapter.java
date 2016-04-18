@@ -78,9 +78,9 @@ public class MainListAdapter extends ArrayAdapter<LocalTweet> {
         TextView dateTextView = (TextView) view.findViewById(R.id.date);
         TextView contentTextView = (TextView) view.findViewById(R.id.content);
 
-        ImageView favoriteButton = (ImageView) view.findViewById(R.id.favorite_button);
-        TextView favoriteTextView = (TextView) view.findViewById(R.id.favorite_text_view);
-        ImageView retweetButton = (ImageView) view.findViewById(R.id.retweet_button);
+        final ImageView favoriteButton = (ImageView) view.findViewById(R.id.favorite_button);
+        final TextView favoriteTextView = (TextView) view.findViewById(R.id.favorite_text_view);
+        final ImageView retweetButton = (ImageView) view.findViewById(R.id.retweet_button);
         TextView retweetTextView = (TextView) view.findViewById(R.id.retweet_text_view);
         ImageView replyButton = (ImageView) view.findViewById(R.id.reply_button);
 
@@ -130,7 +130,6 @@ public class MainListAdapter extends ArrayAdapter<LocalTweet> {
         spannableString.setSpan(new AbsoluteSizeSpan((int) secSize), length + 1, string.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         spannableString.setSpan(new ForegroundColorSpan(color), 0, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         spannableString.setSpan(new ForegroundColorSpan(secColor), length + 1, string.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        spannableString.setSpan(new StyleSpan(Typeface.BOLD), 0, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         nameTextView.setText(spannableString);
         DateTime time = new DateTime(tweet.getEpoch());
         DateTime now = new DateTime();
@@ -164,14 +163,16 @@ public class MainListAdapter extends ArrayAdapter<LocalTweet> {
             @Override
             public void onClick(View view) {
                 Realm realm = Realm.getDefaultInstance();
-                realm.executeTransaction(new Realm.Transaction() {
-                    @Override
-                    public void execute(Realm realm) {
-                        Favorite favorite = realm.createObject(Favorite.class);
-                        favorite.setUserId(tweet.getUserId());
-                        favorite.setTweetId(tweet.getTweetId());
-                    }
-                });
+                LocalTweet localTweet = realm.where(LocalTweet.class).equalTo("tweetId", tweet.getTweetId()).findFirst();
+                if (!localTweet.isFavorite()) {
+                    realm.beginTransaction();
+                    localTweet.setFavoriteCount(localTweet.getFavoriteCount() + 1);
+                    localTweet.setFavorite(true);
+                    realm.copyToRealmOrUpdate(localTweet);
+                    realm.commitTransaction();
+                    favoriteTextView.setText(String.format("%d", Integer.parseInt(favoriteTextView.getText().toString()) + 1));
+                    favoriteButton.setEnabled(false);
+                }
                 realm.close();
             }
         });
@@ -183,6 +184,17 @@ public class MainListAdapter extends ArrayAdapter<LocalTweet> {
             retweetButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    Realm realm = Realm.getDefaultInstance();
+                    LocalTweet localTweet = realm.where(LocalTweet.class).equalTo("tweetId", tweet.getTweetId()).findFirst();
+                    if (!localTweet.isRetweet()) {
+                        realm.beginTransaction();
+                        localTweet.setRetweetCount(localTweet.getRetweetCount() + 1);
+                        localTweet.setRetweet(true);
+                        realm.copyToRealmOrUpdate(localTweet);
+                        realm.commitTransaction();
+                        retweetButton.setEnabled(false);
+                    }
+                    realm.close();
                     // TODO
                 }
             });
