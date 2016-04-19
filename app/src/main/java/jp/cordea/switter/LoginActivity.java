@@ -51,14 +51,6 @@ public class LoginActivity extends AppCompatActivity {
                 Log.d("TwitterKit", "Login with Twitter failure", exception);
             }
         });
-
-
-        addDemo(R.id.demo1, "hogehoge", "_Cordea");
-        addDemo(R.id.demo2, "hogehoge", "_Cordea");
-        addDemo(R.id.demo3, "hogehoge", "_Cordea");
-        addDemo(R.id.demo4, "hogehoge", "_Cordea");
-        addDemo(R.id.demo5, "hogehoge", "_Cordea");
-        addDemo(R.id.demo6, "hogehoge", "_Cordea");
     }
 
     private void getOwnData(TwitterSession session) {
@@ -85,18 +77,6 @@ public class LoginActivity extends AppCompatActivity {
             public void failure(TwitterException e) {
             }
         });
-    }
-
-    private void addDemo(int id, String text, String username) {
-        View view = findViewById(id);
-        assert view != null;
-
-        TextView nameTextView = (TextView) view.findViewById(R.id.user_name);
-        TextView dateTextView = (TextView) view.findViewById(R.id.date);
-        TextView contentTextView = (TextView) view.findViewById(R.id.content);
-
-        nameTextView.setText(username);
-        contentTextView.setText(text);
     }
 
     @Override
