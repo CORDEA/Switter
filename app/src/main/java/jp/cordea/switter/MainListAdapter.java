@@ -95,7 +95,7 @@ public class MainListAdapter extends ArrayAdapter<LocalTweet> {
         final LocalTweet tweet = tweets.get(position);
         String string = tweet.getUserName() + " @" + tweet.getUserScreenName();
         Picasso.with(getContext())
-                .load(tweet.getProfileImageUrl())
+                .load(tweet.getProfileBiggerImageUrl())
                 .transform(new Transformation() {
                     @Override
                     public Bitmap transform(Bitmap source) {

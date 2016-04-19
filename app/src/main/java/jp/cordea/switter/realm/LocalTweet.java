@@ -44,4 +44,8 @@ public class LocalTweet extends RealmObject {
     private int favoriteCount;
 
     private int retweetCount;
+
+    public String getProfileBiggerImageUrl() {
+        return profileImageUrl.replace("normal.png", "bigger.png");
+    }
 }
