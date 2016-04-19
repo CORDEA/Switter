@@ -84,15 +84,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void success(final Result<List<Tweet>> result) {
                 Realm realm = Realm.getDefaultInstance();
-                long maxId = realm.allObjects(LocalTweet.class).max("id").longValue();
+                Number maxId = realm.allObjects(LocalTweet.class).max("id");
                 realm.beginTransaction();
                 List<Tweet> tweets = result.data;
+                long id = maxId == null ? 1 : maxId.longValue() + 1;
                 for (int i = 0; i < tweets.size(); i++) {
                     Tweet tweet = tweets.get(i);
                     if (realm.where(LocalTweet.class).equalTo("tweetId", tweet.id).count() == 0) {
                         LocalTweet localTweet = realm.createObject(LocalTweet.class);
                         DateTime dateTime = parseTwitterDate(tweet.createdAt);
-                        localTweet.setId(maxId + 1);
+                        localTweet.setId(id);
                         localTweet.setEpoch(dateTime.getMillis());
                         localTweet.setText(tweet.text);
                         localTweet.setTweetId(tweet.id);
@@ -102,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
                         localTweet.setFavoriteCount(tweet.favoriteCount);
                         localTweet.setRetweetCount(tweet.retweetCount);
                         localTweet.setProfileImageUrl(tweet.user.profileImageUrl);
-                        Log.i("xxx", tweet.user.profileImageUrl);
+                        ++id;
                     }
                 }
                 realm.commitTransaction();

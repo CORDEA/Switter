@@ -67,7 +67,7 @@ public class PostActivity extends AppCompatActivity {
     private void saveTweet(String text, PostType type, long replyTweetId) {
         Realm realm = Realm.getDefaultInstance();
         ActiveUser user = realm.where(ActiveUser.class).findFirst();
-        long id = realm.allObjects(LocalTweet.class).max("id").longValue();
+        Number id = realm.allObjects(LocalTweet.class).max("id");
         realm.beginTransaction();
         LocalTweet localTweet = realm.createObject(LocalTweet.class);
         switch (type) {
@@ -78,7 +78,7 @@ public class PostActivity extends AppCompatActivity {
         }
 
         // FIXME
-        localTweet.setId(id + 1);
+        localTweet.setId(id == null ? 1 : id.longValue() + 1);
         localTweet.setEpoch(System.currentTimeMillis());
         localTweet.setTweetId(-1);
         localTweet.setText(text);
