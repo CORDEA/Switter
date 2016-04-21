@@ -7,7 +7,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 
@@ -16,7 +15,9 @@ import com.twitter.sdk.android.core.Result;
 import com.twitter.sdk.android.core.TwitterApiClient;
 import com.twitter.sdk.android.core.TwitterCore;
 import com.twitter.sdk.android.core.TwitterException;
+import com.twitter.sdk.android.core.models.MediaEntity;
 import com.twitter.sdk.android.core.models.Tweet;
+import com.twitter.sdk.android.core.models.UrlEntity;
 import com.twitter.sdk.android.core.services.StatusesService;
 
 import org.joda.time.DateTime;
@@ -29,6 +30,8 @@ import java.util.Locale;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import io.realm.Realm;
+import io.realm.RealmList;
+import jp.cordea.switter.realm.LocalEntity;
 import jp.cordea.switter.realm.LocalTweet;
 
 public class MainActivity extends AppCompatActivity {
@@ -103,6 +106,19 @@ public class MainActivity extends AppCompatActivity {
                         localTweet.setFavoriteCount(tweet.favoriteCount);
                         localTweet.setRetweetCount(tweet.retweetCount);
                         localTweet.setProfileImageUrl(tweet.user.profileImageUrl);
+
+                        RealmList<LocalEntity> localEntities = new RealmList<>();
+                        for (int j = 0; j < tweet.entities.media.size(); j++) {
+                            MediaEntity entity = tweet.entities.media.get(j);
+//                            LocalEntity localEntity = new LocalEntity(entity.type, entity.displayUrl, entity.mediaUrl);
+//                            localEntities.add(localEntity);
+                        }
+                        for (int j = 0; j < tweet.entities.urls.size(); j++) {
+                            UrlEntity entity = tweet.entities.urls.get(j);
+//                            LocalEntity localEntity = new LocalEntity("url", entity.displayUrl, entity.url);
+//                            localEntities.add(localEntity);
+                        }
+                        localTweet.setEntities(localEntities);
                         ++id;
                     }
                 }
