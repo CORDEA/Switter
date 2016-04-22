@@ -1,7 +1,6 @@
 package jp.cordea.switter.realm;
 
 import io.realm.RealmObject;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -11,6 +10,15 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class LocalEntity extends RealmObject {
+
+    public LocalEntity() {
+    }
+
+    public LocalEntity(String type, String displayUrl, String mediaUrl) {
+        this.type = type;
+        this.displayUrl = displayUrl;
+        this.mediaUrl = mediaUrl;
+    }
 
     private String type;
 
