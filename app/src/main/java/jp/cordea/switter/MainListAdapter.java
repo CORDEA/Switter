@@ -56,6 +56,7 @@ public class MainListAdapter extends ArrayAdapter<LocalTweet> {
         RealmResults<LocalTweet> realmResults = realm.where(LocalTweet.class).findAllSorted("epoch", Sort.DESCENDING);
         tweets.clear();
         tweets.addAll(realm.copyFromRealm(realmResults));
+        realm.close();
         super.notifyDataSetChanged();
     }
 
@@ -199,7 +200,6 @@ public class MainListAdapter extends ArrayAdapter<LocalTweet> {
                 }
             });
         }
-        realm.close();
 
         favoriteTextView.setText(String.format("%d", favorites));
         retweetTextView.setText(String.format("%d", retweets));
