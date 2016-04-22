@@ -17,6 +17,7 @@ import com.twitter.sdk.android.core.TwitterCore;
 import com.twitter.sdk.android.core.TwitterException;
 import com.twitter.sdk.android.core.models.MediaEntity;
 import com.twitter.sdk.android.core.models.Tweet;
+import com.twitter.sdk.android.core.models.TweetEntities;
 import com.twitter.sdk.android.core.models.UrlEntity;
 import com.twitter.sdk.android.core.services.StatusesService;
 
@@ -106,19 +107,30 @@ public class MainActivity extends AppCompatActivity {
                         localTweet.setFavoriteCount(tweet.favoriteCount);
                         localTweet.setRetweetCount(tweet.retweetCount);
                         localTweet.setProfileImageUrl(tweet.user.profileImageUrl);
+                        localTweet.setRetweet(tweet.retweeted);
 
-                        RealmList<LocalEntity> localEntities = new RealmList<>();
-                        for (int j = 0; j < tweet.entities.media.size(); j++) {
-                            MediaEntity entity = tweet.entities.media.get(j);
-//                            LocalEntity localEntity = new LocalEntity(entity.type, entity.displayUrl, entity.mediaUrl);
-//                            localEntities.add(localEntity);
+                        TweetEntities tweetEntities = tweet.entities;
+                        if (tweetEntities != null) {
+                            RealmList<LocalEntity> localEntities = new RealmList<>();
+
+                            List<MediaEntity> mediaEntities = tweetEntities.media;
+                            if (mediaEntities != null) {
+                                for (int j = 0; j < mediaEntities.size(); j++) {
+                                    MediaEntity entity = mediaEntities.get(j);
+                                    LocalEntity localEntity = new LocalEntity(entity.type, entity.displayUrl, entity.mediaUrl);
+                                    localEntities.add(localEntity);
+                                }
+                            }
+                            List<UrlEntity> urlEntities = tweetEntities.urls;
+                            if (urlEntities != null) {
+                                for (int j = 0; j < urlEntities.size(); j++) {
+                                    UrlEntity entity = urlEntities.get(j);
+                                    LocalEntity localEntity = new LocalEntity("url", entity.displayUrl, entity.url);
+                                    localEntities.add(localEntity);
+                                }
+                            }
+                            localTweet.setEntities(localEntities);
                         }
-                        for (int j = 0; j < tweet.entities.urls.size(); j++) {
-                            UrlEntity entity = tweet.entities.urls.get(j);
-//                            LocalEntity localEntity = new LocalEntity("url", entity.displayUrl, entity.url);
-//                            localEntities.add(localEntity);
-                        }
-                        localTweet.setEntities(localEntities);
                         ++id;
                     }
                 }
