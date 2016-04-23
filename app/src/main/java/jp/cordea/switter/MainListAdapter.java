@@ -8,13 +8,11 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.Typeface;
 import android.support.v4.content.ContextCompat;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.ForegroundColorSpan;
-import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +22,7 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Transformation;
+import com.twitter.sdk.android.core.models.Tweet;
 
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
@@ -32,36 +31,39 @@ import org.joda.time.Interval;
 import java.util.List;
 
 import io.realm.Realm;
-import io.realm.RealmResults;
-import io.realm.Sort;
-import jp.cordea.switter.realm.Favorite;
+import jp.cordea.switter.realm.LocalFavorite;
 import jp.cordea.switter.realm.LocalRetweet;
 import jp.cordea.switter.realm.LocalTweet;
 
 /**
  * Created by Yoshihiro Tanaka on 16/03/30.
  */
-public class MainListAdapter extends ArrayAdapter<LocalTweet> {
+public class MainListAdapter extends ArrayAdapter<Tweet> {
 
-    private List<LocalTweet> tweets;
+    private List<Tweet> tweets;
 
-    public MainListAdapter(Context context, List<LocalTweet> tweets) {
+    public MainListAdapter(Context context, List<Tweet> tweets) {
         super(context, R.layout.main_list_item, tweets);
         this.tweets = tweets;
     }
 
     @Override
     public void notifyDataSetChanged() {
-        Realm realm = Realm.getDefaultInstance();
-        RealmResults<LocalTweet> realmResults = realm.where(LocalTweet.class).findAllSorted("epoch", Sort.DESCENDING);
-        tweets.clear();
-        tweets.addAll(realm.copyFromRealm(realmResults));
-        realm.close();
         super.notifyDataSetChanged();
     }
 
+    public void insertItems(List<Tweet> tweets) {
+        this.tweets.addAll(tweets);
+        // TODO: sort
+        notifyDataSetChanged();
+    }
+
+    public void clearItems() {
+        tweets.clear();
+    }
+
     @Override
-    public LocalTweet getItem(int position) {
+    public Tweet getItem(int position) {
         return tweets.get(position);
     }
 
@@ -93,10 +95,10 @@ public class MainListAdapter extends ArrayAdapter<LocalTweet> {
 
         final float thumbnailRound = getContext().getResources().getDimension(R.dimen.user_thumbnail_round);
 
-        final LocalTweet tweet = tweets.get(position);
-        String string = tweet.getUserName() + " @" + tweet.getUserScreenName();
+        final Tweet tweet = tweets.get(position);
+        String string = tweet.user.name + " @" + tweet.user.screenName;
         Picasso.with(getContext())
-                .load(tweet.getProfileBiggerImageUrl())
+                .load(tweet.user.profileImageUrl)
                 .transform(new Transformation() {
                     @Override
                     public Bitmap transform(Bitmap source) {
@@ -126,13 +128,13 @@ public class MainListAdapter extends ArrayAdapter<LocalTweet> {
                 })
                 .into(userImageView);
         SpannableString spannableString = new SpannableString(string);
-        int length = tweet.getUserName().length();
+        int length = tweet.user.name.length();
         spannableString.setSpan(new AbsoluteSizeSpan((int) size), 0, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         spannableString.setSpan(new AbsoluteSizeSpan((int) secSize), length + 1, string.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         spannableString.setSpan(new ForegroundColorSpan(color), 0, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         spannableString.setSpan(new ForegroundColorSpan(secColor), length + 1, string.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         nameTextView.setText(spannableString);
-        DateTime time = new DateTime(tweet.getEpoch());
+        DateTime time = new DateTime(LocalTweet.twitterDateToEpoch(tweet.createdAt));
         DateTime now = new DateTime();
         Duration duration = new Interval(time, now).toDuration();
         long display = duration.getStandardMinutes();
@@ -147,14 +149,14 @@ public class MainListAdapter extends ArrayAdapter<LocalTweet> {
         }
 
         dateTextView.setText(String.format(getContext().getResources().getString(format), display));
-        contentTextView.setText(tweet.getText());
+        contentTextView.setText(tweet.text);
 
-        int favorites = tweet.getFavoriteCount();
-        int retweets = tweet.getRetweetCount();
+        int favorites = tweet.favoriteCount;
+        int retweets = tweet.retweetCount;
 
         Realm realm = Realm.getDefaultInstance();
-        boolean isFavorite = realm.where(Favorite.class).equalTo("tweetId", tweet.getTweetId()).count() != 0;
-        boolean isRetweet = realm.where(LocalRetweet.class).equalTo("tweetId", tweet.getTweetId()).count() != 0;
+        boolean isFavorite = realm.where(LocalFavorite.class).equalTo("tweetId", tweet.id).count() != 0;
+        boolean isRetweet = realm.where(LocalRetweet.class).equalTo("tweetId", tweet.id).count() != 0;
         realm.close();
 
         if (isFavorite) {
@@ -164,16 +166,13 @@ public class MainListAdapter extends ArrayAdapter<LocalTweet> {
             @Override
             public void onClick(View view) {
                 Realm realm = Realm.getDefaultInstance();
-                LocalTweet localTweet = realm.where(LocalTweet.class).equalTo("tweetId", tweet.getTweetId()).findFirst();
-                if (!localTweet.isFavorite()) {
-                    realm.beginTransaction();
-                    localTweet.setFavoriteCount(localTweet.getFavoriteCount() + 1);
-                    localTweet.setFavorite(true);
-                    realm.copyToRealmOrUpdate(localTweet);
-                    realm.commitTransaction();
-                    favoriteTextView.setText(String.format("%d", Integer.parseInt(favoriteTextView.getText().toString()) + 1));
-                    favoriteButton.setEnabled(false);
-                }
+                realm.beginTransaction();
+                LocalFavorite favorite = realm.createObject(LocalFavorite.class);
+                favorite.setTweetId(tweet.id);
+                favorite.setUserId(tweet.user.id);
+                realm.commitTransaction();
+                favoriteTextView.setText(String.format("%d", Integer.parseInt(favoriteTextView.getText().toString()) + 1));
+                favoriteButton.setEnabled(false);
                 realm.close();
             }
         });
@@ -186,17 +185,8 @@ public class MainListAdapter extends ArrayAdapter<LocalTweet> {
                 @Override
                 public void onClick(View view) {
                     Realm realm = Realm.getDefaultInstance();
-                    LocalTweet localTweet = realm.where(LocalTweet.class).equalTo("tweetId", tweet.getTweetId()).findFirst();
-                    if (!localTweet.isRetweet()) {
-                        realm.beginTransaction();
-                        localTweet.setRetweetCount(localTweet.getRetweetCount() + 1);
-                        localTweet.setRetweet(true);
-                        realm.copyToRealmOrUpdate(localTweet);
-                        realm.commitTransaction();
-                        retweetButton.setEnabled(false);
-                    }
-                    realm.close();
                     // TODO
+                    realm.close();
                 }
             });
         }
@@ -207,7 +197,7 @@ public class MainListAdapter extends ArrayAdapter<LocalTweet> {
         replyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = PostActivity.createIntent(getContext(), PostType.Reply, tweet.getTweetId());
+                Intent intent = PostActivity.createIntent(getContext(), PostType.Reply, tweet.id);
                 getContext().startActivity(intent);
             }
         });

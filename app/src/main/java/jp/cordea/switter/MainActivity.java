@@ -15,24 +15,15 @@ import com.twitter.sdk.android.core.Result;
 import com.twitter.sdk.android.core.TwitterApiClient;
 import com.twitter.sdk.android.core.TwitterCore;
 import com.twitter.sdk.android.core.TwitterException;
-import com.twitter.sdk.android.core.models.MediaEntity;
 import com.twitter.sdk.android.core.models.Tweet;
-import com.twitter.sdk.android.core.models.TweetEntities;
-import com.twitter.sdk.android.core.models.UrlEntity;
 import com.twitter.sdk.android.core.services.StatusesService;
-
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import io.realm.Realm;
-import io.realm.RealmList;
-import jp.cordea.switter.realm.LocalEntity;
 import jp.cordea.switter.realm.LocalTweet;
 
 public class MainActivity extends AppCompatActivity {
@@ -66,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        final MainListAdapter adapter = new MainListAdapter(this, new ArrayList<LocalTweet>());
+        final MainListAdapter adapter = new MainListAdapter(this, new ArrayList<Tweet>());
 
         getTweets(adapter, 50);
 
@@ -88,55 +79,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void success(final Result<List<Tweet>> result) {
                 Realm realm = Realm.getDefaultInstance();
-                Number maxId = realm.allObjects(LocalTweet.class).max("id");
-                realm.beginTransaction();
-                List<Tweet> tweets = result.data;
-                long id = maxId == null ? 1 : maxId.longValue() + 1;
-                for (int i = 0; i < tweets.size(); i++) {
-                    Tweet tweet = tweets.get(i);
-                    if (realm.where(LocalTweet.class).equalTo("tweetId", tweet.id).count() == 0) {
-                        LocalTweet localTweet = realm.createObject(LocalTweet.class);
-                        DateTime dateTime = parseTwitterDate(tweet.createdAt);
-                        localTweet.setId(id);
-                        localTweet.setEpoch(dateTime.getMillis());
-                        localTweet.setText(tweet.text);
-                        localTweet.setTweetId(tweet.id);
-                        localTweet.setUserId(tweet.user.id);
-                        localTweet.setUserName(tweet.user.name);
-                        localTweet.setUserScreenName(tweet.user.screenName);
-                        localTweet.setFavoriteCount(tweet.favoriteCount);
-                        localTweet.setRetweetCount(tweet.retweetCount);
-                        localTweet.setProfileImageUrl(tweet.user.profileImageUrl);
-                        localTweet.setRetweet(tweet.retweeted);
-
-                        TweetEntities tweetEntities = tweet.entities;
-                        if (tweetEntities != null) {
-                            RealmList<LocalEntity> localEntities = new RealmList<>();
-
-                            List<MediaEntity> mediaEntities = tweetEntities.media;
-                            if (mediaEntities != null) {
-                                for (int j = 0; j < mediaEntities.size(); j++) {
-                                    MediaEntity entity = mediaEntities.get(j);
-                                    LocalEntity localEntity = new LocalEntity(entity.type, entity.displayUrl, entity.mediaUrl);
-                                    localEntities.add(localEntity);
-                                }
-                            }
-                            List<UrlEntity> urlEntities = tweetEntities.urls;
-                            if (urlEntities != null) {
-                                for (int j = 0; j < urlEntities.size(); j++) {
-                                    UrlEntity entity = urlEntities.get(j);
-                                    LocalEntity localEntity = new LocalEntity("url", entity.displayUrl, entity.url);
-                                    localEntities.add(localEntity);
-                                }
-                            }
-                            localTweet.setEntities(localEntities);
-                        }
-                        ++id;
-                    }
+                List<LocalTweet> localTweets = realm.copyFromRealm(realm.allObjects(LocalTweet.class));
+                List<Tweet> tweets = new ArrayList<>();
+                tweets.addAll(result.data);
+                for (int i = 0; i < localTweets.size(); i++) {
+                    tweets.add(LocalTweet.toTweet(localTweets.get(i)));
                 }
-                realm.commitTransaction();
                 realm.close();
-                adapter.notifyDataSetChanged();
+                adapter.insertItems(tweets);
             }
 
             @Override
@@ -144,9 +94,5 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         });
-    }
-
-    private DateTime parseTwitterDate(String twitterDate) {
-        return DateTime.parse(twitterDate, DateTimeFormat.forPattern("EEE MMM dd HH:mm:ss Z yyyy").withLocale(Locale.ENGLISH));
     }
 }

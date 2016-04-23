@@ -79,7 +79,7 @@ public class PostActivity extends AppCompatActivity {
 
         // FIXME
         localTweet.setId(id == null ? 1 : id.longValue() + 1);
-        localTweet.setEpoch(System.currentTimeMillis());
+        localTweet.setCreatedAt(LocalTweet.epochToString(System.currentTimeMillis()));
         localTweet.setTweetId(-1);
         localTweet.setText(text);
         localTweet.setUserName(user.getName());
