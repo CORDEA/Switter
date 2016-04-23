@@ -11,7 +11,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class Favorite extends RealmObject {
+public class LocalFavorite extends RealmObject {
     @PrimaryKey
     private long tweetId;
 
