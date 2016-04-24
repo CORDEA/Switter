@@ -28,6 +28,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.Interval;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.realm.Realm;
@@ -80,6 +81,7 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
         TextView nameTextView = (TextView) view.findViewById(R.id.user_name);
         TextView dateTextView = (TextView) view.findViewById(R.id.date);
         TextView contentTextView = (TextView) view.findViewById(R.id.content);
+        TimelineImageView timelineImageView = (TimelineImageView) view.findViewById(R.id.timeline_image_view);
 
         final ImageView favoriteButton = (ImageView) view.findViewById(R.id.favorite_button);
         final TextView favoriteTextView = (TextView) view.findViewById(R.id.favorite_text_view);
@@ -149,6 +151,10 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
         }
 
         dateTextView.setText(String.format(getContext().getResources().getString(format), display));
+
+        if (tweet.entities != null && tweet.entities.media.size() > 0) {
+            timelineImageView.setImages(tweet.entities.media);
+        }
         contentTextView.setText(tweet.text);
 
         int favorites = tweet.favoriteCount;
@@ -161,6 +167,7 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
 
         if (isFavorite) {
             ++favorites;
+            favoriteButton.setEnabled(false);
         } else {
             favoriteButton.setOnClickListener(new View.OnClickListener() {
             @Override

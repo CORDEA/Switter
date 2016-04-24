@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import com.twitter.sdk.android.core.models.MediaEntity;
+
 import java.util.List;
 
 import butterknife.Bind;
@@ -40,9 +42,9 @@ public class TimelineImageView extends LinearLayout {
         inflate(context, R.layout.view_timeline_image, this);
     }
 
-    public void setImages(List<String> imageUrls) {
+    public void setImages(List<MediaEntity> mediaEntities) {
         // TODO
-        switch (imageUrls.size()) {
+        switch (mediaEntities.size()) {
             case 1:
                 oneImageLayout();
                 break;
