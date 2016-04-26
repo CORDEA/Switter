@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
     private void getTweets(final MainListAdapter adapter, int count) {
         TwitterApiClient client = TwitterCore.getInstance().getApiClient();
         StatusesService service = client.getStatusesService();
-        service.homeTimeline(count, null, null, false, false, false, false, new Callback<List<Tweet>>() {
+        service.homeTimeline(count, null, null, false, false, false, true, new Callback<List<Tweet>>() {
             @Override
             public void success(final Result<List<Tweet>> result) {
                 Realm realm = Realm.getDefaultInstance();
