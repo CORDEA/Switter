@@ -28,7 +28,6 @@ import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.Interval;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import io.realm.Realm;
@@ -56,6 +55,7 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
     public void insertItems(List<Tweet> tweets) {
         this.tweets.addAll(tweets);
         // TODO: sort
+
         notifyDataSetChanged();
     }
 
@@ -152,8 +152,10 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
 
         dateTextView.setText(String.format(getContext().getResources().getString(format), display));
 
-        if (tweet.entities != null && tweet.entities.media.size() > 0) {
+        if (tweet.entities != null  && tweet.entities.media != null && tweet.entities.media.size() > 0) {
             timelineImageView.setImages(tweet.entities.media);
+        } else {
+            timelineImageView.setVisibility(View.GONE);
         }
         contentTextView.setText(tweet.text);
 
