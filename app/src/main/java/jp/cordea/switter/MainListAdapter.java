@@ -28,6 +28,8 @@ import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.Interval;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import io.realm.Realm;
@@ -54,7 +56,20 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
 
     public void insertItems(List<Tweet> tweets) {
         this.tweets.addAll(tweets);
-        // TODO: sort
+
+        Collections.sort(tweets, new Comparator<Tweet>() {
+            @Override
+            public int compare(Tweet tweet, Tweet t1) {
+                long d = LocalTweet.twitterDateToEpoch(tweet.createdAt) - LocalTweet.twitterDateToEpoch(t1.createdAt);
+                if (d == 0) {
+                    return 0;
+                }
+                if (d > 0) {
+                    return -1;
+                }
+                return 1;
+            }
+        });
 
         notifyDataSetChanged();
     }
