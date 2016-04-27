@@ -57,7 +57,7 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
     public void insertItems(List<Tweet> tweets) {
         this.tweets.addAll(tweets);
 
-        Collections.sort(tweets, new Comparator<Tweet>() {
+        Collections.sort(this.tweets, new Comparator<Tweet>() {
             @Override
             public int compare(Tweet tweet, Tweet t1) {
                 long d = LocalTweet.twitterDateToEpoch(tweet.createdAt) - LocalTweet.twitterDateToEpoch(t1.createdAt);
