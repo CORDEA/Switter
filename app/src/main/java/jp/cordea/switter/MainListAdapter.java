@@ -97,6 +97,8 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
         TextView dateTextView = (TextView) view.findViewById(R.id.date);
         TextView contentTextView = (TextView) view.findViewById(R.id.content);
         TimelineImageView timelineImageView = (TimelineImageView) view.findViewById(R.id.timeline_image_view);
+        View retweetNotifyContainer = view.findViewById(R.id.retweet_notify_container);
+        TextView retweetNotifyTextView = (TextView) view.findViewById(R.id.retweet_notify_text_view);
 
         final ImageView favoriteButton = (ImageView) view.findViewById(R.id.favorite_button);
         final TextView favoriteTextView = (TextView) view.findViewById(R.id.favorite_text_view);
@@ -107,12 +109,23 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
         int color = ContextCompat.getColor(getContext(), R.color.colorPrimaryText);
         int secColor = ContextCompat.getColor(getContext(), R.color.colorSecondaryText);
 
+        String retweetNotifyFormatText = getContext().getResources().getString(R.string.retweet_notify_format_text);
+
         float size = getContext().getResources().getDimension(R.dimen.user_name_text_size);
         float secSize = getContext().getResources().getDimension(R.dimen.user_id_text_size);
 
         final float thumbnailRound = getContext().getResources().getDimension(R.dimen.user_thumbnail_round);
 
-        final Tweet tweet = tweets.get(position);
+        Tweet tweet = tweets.get(position);
+
+        if (tweet.retweetedStatus == null) {
+            retweetNotifyContainer.setVisibility(View.GONE);
+        } else {
+            retweetNotifyContainer.setVisibility(View.VISIBLE);
+            retweetNotifyTextView.setText(String.format(retweetNotifyFormatText, tweet.user.name));
+            tweet = tweet.retweetedStatus;
+        }
+
         String string = tweet.user.name + " @" + tweet.user.screenName;
         Picasso.with(getContext())
                 .load(tweet.user.profileImageUrl)
@@ -182,6 +195,8 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
         boolean isRetweet = realm.where(LocalRetweet.class).equalTo("tweetId", tweet.id).count() != 0;
         realm.close();
 
+        final Tweet finalTweet = tweet;
+
         if (isFavorite) {
             ++favorites;
             favoriteButton.setEnabled(false);
@@ -192,8 +207,8 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
                 Realm realm = Realm.getDefaultInstance();
                 realm.beginTransaction();
                 LocalFavorite favorite = realm.createObject(LocalFavorite.class);
-                favorite.setTweetId(tweet.id);
-                favorite.setUserId(tweet.user.id);
+                favorite.setTweetId(finalTweet.id);
+                favorite.setUserId(finalTweet.user.id);
                 realm.commitTransaction();
                 favoriteTextView.setText(String.format("%d", Integer.parseInt(favoriteTextView.getText().toString()) + 1));
                 favoriteButton.setEnabled(false);
@@ -221,7 +236,7 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
         replyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = PostActivity.createIntent(getContext(), PostType.Reply, tweet.id);
+                Intent intent = PostActivity.createIntent(getContext(), PostType.Reply, finalTweet.id);
                 getContext().startActivity(intent);
             }
         });
