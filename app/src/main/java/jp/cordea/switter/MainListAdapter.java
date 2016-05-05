@@ -1,5 +1,6 @@
 package jp.cordea.switter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -43,10 +44,14 @@ import jp.cordea.switter.realm.LocalTweet;
 public class MainListAdapter extends ArrayAdapter<Tweet> {
 
     private List<Tweet> tweets;
+    private final int postRequestCode;
+    private Activity activity;
 
-    public MainListAdapter(Context context, List<Tweet> tweets) {
-        super(context, R.layout.main_list_item, tweets);
+    public MainListAdapter(Activity activity, List<Tweet> tweets, int postRequestCode) {
+        super(activity, R.layout.main_list_item, tweets);
         this.tweets = tweets;
+        this.activity = activity;
+        this.postRequestCode = postRequestCode;
     }
 
     @Override
@@ -166,6 +171,7 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
         nameTextView.setText(spannableString);
         DateTime time = new DateTime(LocalTweet.twitterDateToEpoch(tweet.createdAt));
         DateTime now = new DateTime();
+        // FIXME
         Duration duration = new Interval(time, now).toDuration();
         long display = duration.getStandardMinutes();
         int format = R.string.minute_format;
@@ -237,7 +243,7 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
             @Override
             public void onClick(View view) {
                 Intent intent = PostActivity.createIntent(getContext(), PostType.Reply, finalTweet.id);
-                getContext().startActivity(intent);
+                activity.startActivityForResult(intent, postRequestCode);
             }
         });
 

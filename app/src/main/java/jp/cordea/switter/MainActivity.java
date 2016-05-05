@@ -1,5 +1,6 @@
 package jp.cordea.switter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -28,6 +29,8 @@ import jp.cordea.switter.realm.LocalTweet;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final int POST_REQUEST_CODE = 100;
+
     @Bind(R.id.toolbar)
     Toolbar toolbar;
 
@@ -39,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Bind(R.id.list_view)
     ListView listView;
+
+    private MainListAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,11 +58,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = PostActivity.createIntent(context, PostType.Tweet, -1);
-                startActivity(intent);
+                startActivityForResult(intent, POST_REQUEST_CODE);
             }
         });
 
-        final MainListAdapter adapter = new MainListAdapter(this, new ArrayList<Tweet>());
+        adapter = new MainListAdapter(this, new ArrayList<Tweet>(), POST_REQUEST_CODE);
 
         getTweets(adapter, 50);
 
@@ -66,10 +71,25 @@ public class MainActivity extends AppCompatActivity {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                getTweets(adapter, 10);
-                swipeRefreshLayout.setRefreshing(false);
+                refresh();
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == POST_REQUEST_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                swipeRefreshLayout.setRefreshing(true);
+                refresh();
+            }
+        }
+    }
+
+    private void refresh() {
+        getTweets(adapter, 10);
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     private void getTweets(final MainListAdapter adapter, int count) {

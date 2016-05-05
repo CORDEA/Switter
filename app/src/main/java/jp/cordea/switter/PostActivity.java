@@ -1,5 +1,6 @@
 package jp.cordea.switter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -59,6 +60,7 @@ public class PostActivity extends AppCompatActivity {
                 if (editable != null && editable.length() > 0) {
                     saveTweet(editable.toString(), type, replyTweetId);
                 }
+                setResult(Activity.RESULT_OK);
                 finish();
             }
         });
