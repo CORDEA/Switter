@@ -1,7 +1,6 @@
 package jp.cordea.switter;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
@@ -43,25 +42,8 @@ import jp.cordea.switter.realm.LocalTweet;
  */
 public class MainListAdapter extends ArrayAdapter<Tweet> {
 
-    private List<Tweet> tweets;
-    private final int postRequestCode;
-    private Activity activity;
-
-    public MainListAdapter(Activity activity, List<Tweet> tweets, int postRequestCode) {
-        super(activity, R.layout.main_list_item, tweets);
+    public void setTweets(List<Tweet> tweets) {
         this.tweets = tweets;
-        this.activity = activity;
-        this.postRequestCode = postRequestCode;
-    }
-
-    @Override
-    public void notifyDataSetChanged() {
-        super.notifyDataSetChanged();
-    }
-
-    public void insertItems(List<Tweet> tweets) {
-        this.tweets.addAll(tweets);
-
         Collections.sort(this.tweets, new Comparator<Tweet>() {
             @Override
             public int compare(Tweet tweet, Tweet t1) {
@@ -79,8 +61,22 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
         notifyDataSetChanged();
     }
 
-    public void clearItems() {
-        tweets.clear();
+    private List<Tweet> tweets;
+
+    private final int postRequestCode;
+    private Activity activity;
+
+
+    public MainListAdapter(Activity activity, List<Tweet> tweets, int postRequestCode) {
+        super(activity, R.layout.main_list_item, tweets);
+        this.tweets = tweets;
+        this.activity = activity;
+        this.postRequestCode = postRequestCode;
+    }
+
+    @Override
+    public void notifyDataSetChanged() {
+        super.notifyDataSetChanged();
     }
 
     @Override

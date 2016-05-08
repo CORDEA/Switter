@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void refresh() {
-        getTweets(adapter, 10);
+        getTweets(adapter, 50);
         swipeRefreshLayout.setRefreshing(false);
     }
 
@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
                     tweets.add(LocalTweet.toTweet(localTweets.get(i)));
                 }
                 realm.close();
-                adapter.insertItems(tweets);
+                adapter.setTweets(tweets);
             }
 
             @Override
