@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
 import com.twitter.sdk.android.core.TwitterCore;
@@ -38,19 +39,27 @@ public class LoginActivity extends AppCompatActivity {
 
         final Context context = this;
 
-        loginButton.setCallback(new Callback<TwitterSession>() {
-            @Override
-            public void success(Result<TwitterSession> result) {
-                Intent intent = new Intent(context, MainActivity.class);
-                startActivity(intent);
-                TwitterSession session = result.data;
-                getOwnData(session);
-            }
-            @Override
-            public void failure(TwitterException exception) {
-                Log.d("TwitterKit", "Login with Twitter failure", exception);
-            }
-        });
+        TwitterSession session = Twitter.getSessionManager().getActiveSession();
+        if (session == null) {
+            loginButton.setCallback(new Callback<TwitterSession>() {
+                @Override
+                public void success(Result<TwitterSession> result) {
+                    Intent intent = new Intent(context, MainActivity.class);
+                    startActivity(intent);
+                    TwitterSession session = result.data;
+                    getOwnData(session);
+                }
+
+                @Override
+                public void failure(TwitterException exception) {
+                    Log.d("TwitterKit", "Login with Twitter failure", exception);
+                }
+            });
+        } else {
+            Intent intent = new Intent(context, MainActivity.class);
+            startActivity(intent);
+            getOwnData(session);
+        }
     }
 
     private void getOwnData(TwitterSession session) {
