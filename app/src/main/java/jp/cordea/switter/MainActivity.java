@@ -101,9 +101,21 @@ public class MainActivity extends AppCompatActivity {
                 Realm realm = Realm.getDefaultInstance();
                 List<LocalTweet> localTweets = realm.copyFromRealm(realm.allObjects(LocalTweet.class));
                 List<Tweet> tweets = new ArrayList<>();
-                tweets.addAll(result.data);
-                for (int i = 0; i < localTweets.size(); i++) {
-                    tweets.add(LocalTweet.toTweet(localTweets.get(i)));
+                if (result.data.size() > 0) {
+                    tweets.addAll(result.data);
+                    long minEpoch = LocalTweet.twitterDateToEpoch(result.data.get(0).createdAt);
+                    for (int i = 0; i < result.data.size(); i++) {
+                        Tweet tweet = result.data.get(i);
+                        long epoch = LocalTweet.twitterDateToEpoch(tweet.createdAt);
+                        if (minEpoch > epoch) {
+                            minEpoch = epoch;
+                        }
+                    }
+                    for (int i = 0; i < localTweets.size(); i++) {
+                        if (minEpoch <= LocalTweet.twitterDateToEpoch(localTweets.get(i).getCreatedAt())) {
+                            tweets.add(localTweets.get(i).toTweet());
+                        }
+                    }
                 }
                 realm.close();
                 adapter.setTweets(tweets);
