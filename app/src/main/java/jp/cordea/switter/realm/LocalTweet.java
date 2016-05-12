@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
 import io.realm.RealmList;
 import io.realm.RealmObject;
@@ -66,8 +65,7 @@ public class LocalTweet extends RealmObject {
         return profileImageUrl.replace("normal.png", "bigger.png");
     }
 
-    public static Tweet toTweet(LocalTweet localTweet) {
-        RealmList<LocalEntity> entities = localTweet.getEntities();
+    public Tweet toTweet() {
         List<UrlEntity> urlEntities = new ArrayList<>();
         List<MediaEntity> mediaEntities = new ArrayList<>();
         for (int i = 0; i < entities.size(); i++) {
@@ -82,14 +80,14 @@ public class LocalTweet extends RealmObject {
 
         return new Tweet(
                 null,
-                localTweet.getCreatedAt(),
+                createdAt,
                 null,
                 new TweetEntities(urlEntities, null, mediaEntities, null),
                 null,
-                localTweet.getFavoriteCount(),
-                localTweet.isFavorite(),
+                favoriteCount,
+                isFavorite,
                 null,
-                localTweet.getTweetId(),
+                tweetId,
                 null,
                 null,
                 0,
@@ -100,15 +98,16 @@ public class LocalTweet extends RealmObject {
                 null,
                 false,
                 null,
-                localTweet.getRetweetCount(),
-                localTweet.isRetweet(),
+                retweetCount,
+                isRetweet,
                 null,
                 null,
-                localTweet.getText(),
+                text,
                 false,
-                new User(false, null, false, false, null, null, null, 0, false, 0, 0, false, localTweet.getUserId(), null, false, null, 0, null, localTweet.getUserName(),
-                        null, null, null, false, null, localTweet.getProfileImageUrl(), null, null, null, null, null, false,
-                        false, localTweet.getUserScreenName(), false, null, 0, null, null, 0 , false, null, null),
+                new User(false, null, false, false, null, null, null, 0, false, 0, 0, false, userId,
+                        null, false, null, 0, null, userName,
+                        null, null, null, false, null, profileImageUrl, null, null, null, null, null, false,
+                        false, userScreenName, false, null, 0, null, null, 0 , false, null, null),
                 false,
                 null,
                 null);
