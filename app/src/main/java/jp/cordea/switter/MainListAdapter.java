@@ -192,10 +192,14 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
         int favorites = tweet.favoriteCount;
         int retweets = tweet.retweetCount;
 
-        Realm realm = Realm.getDefaultInstance();
-        boolean isFavorite = realm.where(LocalFavorite.class).equalTo("tweetId", tweet.id).count() != 0;
-        boolean isRetweet = realm.where(LocalRetweet.class).equalTo("tweetId", tweet.id).count() != 0;
-        realm.close();
+        boolean isFavorite = false;
+        boolean isRetweet = false;
+        if (tweet.id != -1) {
+            Realm realm = Realm.getDefaultInstance();
+            isFavorite = realm.where(LocalFavorite.class).equalTo("tweetId", tweet.id).count() != 0;
+            isRetweet = realm.where(LocalRetweet.class).equalTo("tweetId", tweet.id).count() != 0;
+            realm.close();
+        }
 
         final Tweet finalTweet = tweet;
 
@@ -203,45 +207,57 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
             ++favorites;
             favoriteButton.setEnabled(false);
         } else {
-            favoriteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Realm realm = Realm.getDefaultInstance();
-                realm.beginTransaction();
-                LocalFavorite favorite = realm.createObject(LocalFavorite.class);
-                favorite.setTweetId(finalTweet.id);
-                favorite.setUserId(finalTweet.user.id);
-                realm.commitTransaction();
-                favoriteTextView.setText(String.format("%d", Integer.parseInt(favoriteTextView.getText().toString()) + 1));
+            if (tweet.id == -1) {
                 favoriteButton.setEnabled(false);
-                realm.close();
+            } else {
+                favoriteButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Realm realm = Realm.getDefaultInstance();
+                        realm.beginTransaction();
+                        LocalFavorite favorite = realm.createObject(LocalFavorite.class);
+                        favorite.setTweetId(finalTweet.id);
+                        favorite.setUserId(finalTweet.user.id);
+                        realm.commitTransaction();
+                        favoriteTextView.setText(String.format("%d", Integer.parseInt(favoriteTextView.getText().toString()) + 1));
+                        favoriteButton.setEnabled(false);
+                        realm.close();
+                    }
+                });
             }
-        });
         }
 
         if (isRetweet) {
             ++retweets;
         } else {
-            retweetButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Realm realm = Realm.getDefaultInstance();
-                    // TODO
-                    realm.close();
-                }
-            });
+            if (tweet.id == -1) {
+                retweetButton.setEnabled(false);
+            } else {
+                retweetButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Realm realm = Realm.getDefaultInstance();
+                        // TODO
+                        realm.close();
+                    }
+                });
+            }
         }
 
         favoriteTextView.setText(String.format("%d", favorites));
         retweetTextView.setText(String.format("%d", retweets));
 
-        replyButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = PostActivity.createIntent(getContext(), PostType.Reply, finalTweet.id);
-                activity.startActivityForResult(intent, postRequestCode);
-            }
-        });
+        if (tweet.id == -1) {
+            replyButton.setEnabled(false);
+        } else {
+            replyButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = PostActivity.createIntent(getContext(), PostType.Reply, finalTweet.id);
+                    activity.startActivityForResult(intent, postRequestCode);
+                }
+            });
+        }
 
         return view;
     }
