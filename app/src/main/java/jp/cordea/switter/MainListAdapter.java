@@ -8,6 +8,8 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.v4.content.ContextCompat;
 import android.text.SpannableString;
 import android.text.Spanned;
@@ -31,6 +33,7 @@ import org.joda.time.Interval;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 import io.realm.Realm;
 import jp.cordea.switter.realm.LocalFavorite;
@@ -65,7 +68,6 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
 
     private final int postRequestCode;
     private Activity activity;
-
 
     public MainListAdapter(Activity activity, List<Tweet> tweets, int postRequestCode) {
         super(activity, R.layout.main_list_item, tweets);
@@ -127,7 +129,8 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
             tweet = tweet.retweetedStatus;
         }
 
-        String string = tweet.user.name + " @" + tweet.user.screenName;
+        String string = tweet.user.name + " "
+                + String.format(getContext().getResources().getString(R.string.mention_format_text), tweet.user.screenName);
         Picasso.with(getContext())
                 .load(tweet.user.profileImageUrl)
                 .transform(new Transformation() {
@@ -219,7 +222,7 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
                         favorite.setTweetId(finalTweet.id);
                         favorite.setUserId(finalTweet.user.id);
                         realm.commitTransaction();
-                        favoriteTextView.setText(String.format("%d", Integer.parseInt(favoriteTextView.getText().toString()) + 1));
+                        favoriteTextView.setText(String.format(Locale.getDefault(), "%d", Integer.parseInt(favoriteTextView.getText().toString()) + 1));
                         favoriteButton.setEnabled(false);
                         realm.close();
                     }
@@ -244,8 +247,8 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
             }
         }
 
-        favoriteTextView.setText(String.format("%d", favorites));
-        retweetTextView.setText(String.format("%d", retweets));
+        favoriteTextView.setText(String.format(Locale.getDefault(), "%d", favorites));
+        retweetTextView.setText(String.format(Locale.getDefault(), "%d", retweets));
 
         if (tweet.id == -1) {
             replyButton.setEnabled(false);
@@ -253,7 +256,7 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
             replyButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent intent = PostActivity.createIntent(getContext(), PostType.Reply, finalTweet.id);
+                    Intent intent = PostActivity.createIntent(getContext(), PostType.Reply, ParcelableTweet.fromTweet(finalTweet));
                     activity.startActivityForResult(intent, postRequestCode);
                 }
             });

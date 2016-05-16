@@ -11,6 +11,8 @@ import android.text.Editable;
 import android.view.View;
 import android.widget.EditText;
 
+import org.parceler.Parcels;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import io.realm.Realm;
@@ -20,7 +22,7 @@ import jp.cordea.switter.realm.LocalTweet;
 public class PostActivity extends AppCompatActivity {
 
     private static final String POST_TYPE_KEY = "PostTypeKey";
-    private static final String REPLY_TWEET_ID_KEY = "ReplyTweetIdKey";
+    private static final String REPLY_TWEET_KEY = "ReplyTweetIdKey";
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
@@ -31,11 +33,11 @@ public class PostActivity extends AppCompatActivity {
     @Bind(R.id.edit_text)
     EditText editText;
 
-    public static Intent createIntent(Context context, PostType type, long replyTweetId) {
+    public static Intent createIntent(Context context, PostType type, ParcelableTweet replyTweet) {
         // TODO: receive user data
         Intent intent = new Intent(context, PostActivity.class);
         intent.putExtra(POST_TYPE_KEY, type.toString());
-        intent.putExtra(REPLY_TWEET_ID_KEY, replyTweetId);
+        intent.putExtra(REPLY_TWEET_KEY, Parcels.wrap(replyTweet));
         return intent;
     }
 
@@ -49,16 +51,19 @@ public class PostActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         final PostType type = PostType.valueOf(getIntent().getStringExtra(POST_TYPE_KEY));
-        final long replyTweetId = getIntent().getLongExtra(REPLY_TWEET_ID_KEY, -1);
+        final ParcelableTweet replyTweet = Parcels.unwrap(getIntent().getParcelableExtra(REPLY_TWEET_KEY));
 
-        // TODO: insert text
+        if (replyTweet != null) {
+            editText.setText(String.format(getResources().getString(R.string.mention_format_text), replyTweet.getUserScreenName()));
+        }
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Editable editable = editText.getText();
                 if (editable != null && editable.length() > 0) {
-                    saveTweet(editable.toString(), type, replyTweetId);
+                    assert replyTweet != null;
+                    saveTweet(editable.toString(), type, replyTweet.getTweetId());
                 }
                 setResult(Activity.RESULT_OK);
                 finish();

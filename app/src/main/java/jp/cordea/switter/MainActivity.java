@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = PostActivity.createIntent(context, PostType.Tweet, -1);
+                Intent intent = PostActivity.createIntent(context, PostType.Tweet, null);
                 startActivityForResult(intent, POST_REQUEST_CODE);
             }
         });
