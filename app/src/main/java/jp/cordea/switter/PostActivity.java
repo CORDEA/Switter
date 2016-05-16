@@ -55,6 +55,7 @@ public class PostActivity extends AppCompatActivity {
 
         if (replyTweet != null) {
             editText.setText(String.format(getResources().getString(R.string.mention_format_text), replyTweet.getUserScreenName()));
+            editText.setSelection(editText.getText().length());
         }
 
         button.setOnClickListener(new View.OnClickListener() {
