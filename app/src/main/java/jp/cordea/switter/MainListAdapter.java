@@ -1,6 +1,7 @@
 package jp.cordea.switter;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
@@ -11,6 +12,7 @@ import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.AbsoluteSizeSpan;
@@ -232,6 +234,7 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
 
         if (isRetweet) {
             ++retweets;
+            retweetButton.setEnabled(false);
         } else {
             if (tweet.id == -1) {
                 retweetButton.setEnabled(false);
@@ -239,9 +242,28 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
                 retweetButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Realm realm = Realm.getDefaultInstance();
-                        // TODO
-                        realm.close();
+                        new AlertDialog.Builder(getContext())
+                        .setItems(R.array.retweets, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                if (i == 0) {
+                                    Realm realm = Realm.getDefaultInstance();
+                                    realm.beginTransaction();
+                                    LocalRetweet retweet = realm.createObject(LocalRetweet.class);
+                                    retweet.setTweetId(finalTweet.id);
+                                    retweet.setText(finalTweet.text);
+                                    retweet.setName(finalTweet.user.name);
+                                    retweet.setScreenName(finalTweet.user.screenName);
+                                    retweet.setProfileImageUrl(finalTweet.user.profileImageUrl);
+                                    realm.commitTransaction();
+                                    realm.close();
+                                    retweetButton.setEnabled(false);
+                                } else {
+                                    // FIXME
+                                }
+                            }
+                        })
+                        .show();
                     }
                 });
             }

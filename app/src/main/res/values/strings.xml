@@ -9,4 +9,8 @@
     <string name="day_format">%d日</string>
     <string name="retweet_notify_format_text">%sさんがリツイートしました</string>
     <string name="mention_format_text">"@%s "</string>
+    <string-array name="retweets">
+        <item>リツイート</item>
+        <item>引用リツイート</item>
+    </string-array>
 </resources>
