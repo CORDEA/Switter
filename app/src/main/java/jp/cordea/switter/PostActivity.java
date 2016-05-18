@@ -10,10 +10,12 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import org.parceler.Parcels;
 
 import butterknife.Bind;
+import butterknife.BindInt;
 import butterknife.ButterKnife;
 import io.realm.Realm;
 import jp.cordea.switter.realm.ActiveUser;
@@ -32,6 +34,15 @@ public class PostActivity extends AppCompatActivity {
 
     @Bind(R.id.edit_text)
     EditText editText;
+
+    @Bind(R.id.retweet)
+    View retweetLayout;
+
+    @Bind(R.id.user_name)
+    TextView usernameTextView;
+
+    @Bind(R.id.content)
+    TextView contentTextView;
 
     public static Intent createIntent(Context context, PostType type, ParcelableTweet replyTweet) {
         // TODO: receive user data
@@ -54,8 +65,18 @@ public class PostActivity extends AppCompatActivity {
         final ParcelableTweet replyTweet = Parcels.unwrap(getIntent().getParcelableExtra(REPLY_TWEET_KEY));
 
         if (replyTweet != null) {
-            editText.setText(String.format(getResources().getString(R.string.mention_format_text), replyTweet.getUserScreenName()));
-            editText.setSelection(editText.getText().length());
+            switch (type) {
+                case Reply:
+                    editText.setText(String.format(getResources().getString(R.string.mention_format_text), replyTweet.getUserScreenName()));
+                    editText.setSelection(editText.getText().length());
+                    break;
+                case Retweet:
+                    retweetLayout.setVisibility(View.VISIBLE);
+                    // FIXME
+//                    usernameTextView.setText();
+                    contentTextView.setText(replyTweet.getText());
+                    break;
+            }
         }
 
         button.setOnClickListener(new View.OnClickListener() {

@@ -262,7 +262,8 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
                                             Integer.parseInt(retweetTextView.getText().toString()) + 1));
                                     retweetButton.setEnabled(false);
                                 } else {
-                                    // FIXME
+                                    Intent intent = PostActivity.createIntent(getContext(), PostType.Retweet, ParcelableTweet.fromTweet(finalTweet));
+                                    activity.startActivityForResult(intent, postRequestCode);
                                 }
                             }
                         })
