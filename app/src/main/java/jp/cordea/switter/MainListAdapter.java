@@ -108,7 +108,7 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
         final ImageView favoriteButton = (ImageView) view.findViewById(R.id.favorite_button);
         final TextView favoriteTextView = (TextView) view.findViewById(R.id.favorite_text_view);
         final ImageView retweetButton = (ImageView) view.findViewById(R.id.retweet_button);
-        TextView retweetTextView = (TextView) view.findViewById(R.id.retweet_text_view);
+        final TextView retweetTextView = (TextView) view.findViewById(R.id.retweet_text_view);
         ImageView replyButton = (ImageView) view.findViewById(R.id.reply_button);
 
         int color = ContextCompat.getColor(getContext(), R.color.colorPrimaryText);
@@ -224,7 +224,8 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
                         favorite.setTweetId(finalTweet.id);
                         favorite.setUserId(finalTweet.user.id);
                         realm.commitTransaction();
-                        favoriteTextView.setText(String.format(Locale.getDefault(), "%d", Integer.parseInt(favoriteTextView.getText().toString()) + 1));
+                        favoriteTextView.setText(String.format(Locale.getDefault(), "%d",
+                                Integer.parseInt(favoriteTextView.getText().toString()) + 1));
                         favoriteButton.setEnabled(false);
                         realm.close();
                     }
@@ -257,6 +258,8 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
                                     retweet.setProfileImageUrl(finalTweet.user.profileImageUrl);
                                     realm.commitTransaction();
                                     realm.close();
+                                    retweetTextView.setText(String.format(Locale.getDefault(), "%d",
+                                            Integer.parseInt(retweetTextView.getText().toString()) + 1));
                                     retweetButton.setEnabled(false);
                                 } else {
                                     // FIXME
