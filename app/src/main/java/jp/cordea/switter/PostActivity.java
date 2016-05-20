@@ -15,7 +15,6 @@ import android.widget.TextView;
 import org.parceler.Parcels;
 
 import butterknife.Bind;
-import butterknife.BindInt;
 import butterknife.ButterKnife;
 import io.realm.Realm;
 import jp.cordea.switter.realm.ActiveUser;
@@ -39,7 +38,7 @@ public class PostActivity extends AppCompatActivity {
     View retweetLayout;
 
     @Bind(R.id.user_name)
-    TextView usernameTextView;
+    TextView userNameTextView;
 
     @Bind(R.id.content)
     TextView contentTextView;
@@ -72,8 +71,7 @@ public class PostActivity extends AppCompatActivity {
                     break;
                 case Retweet:
                     retweetLayout.setVisibility(View.VISIBLE);
-                    // FIXME
-//                    usernameTextView.setText();
+                    userNameTextView.setText(TimeLineUtils.getSpannableStringOfName(this, replyTweet.getUserName(), replyTweet.getUserScreenName()));
                     contentTextView.setText(replyTweet.getText());
                     break;
             }

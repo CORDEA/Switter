@@ -9,14 +9,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.style.AbsoluteSizeSpan;
-import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -111,13 +104,7 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
         final TextView retweetTextView = (TextView) view.findViewById(R.id.retweet_text_view);
         ImageView replyButton = (ImageView) view.findViewById(R.id.reply_button);
 
-        int color = ContextCompat.getColor(getContext(), R.color.colorPrimaryText);
-        int secColor = ContextCompat.getColor(getContext(), R.color.colorSecondaryText);
-
         String retweetNotifyFormatText = getContext().getResources().getString(R.string.retweet_notify_format_text);
-
-        float size = getContext().getResources().getDimension(R.dimen.user_name_text_size);
-        float secSize = getContext().getResources().getDimension(R.dimen.user_id_text_size);
 
         final float thumbnailRound = getContext().getResources().getDimension(R.dimen.user_thumbnail_round);
 
@@ -131,8 +118,6 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
             tweet = tweet.retweetedStatus;
         }
 
-        String string = tweet.user.name + " "
-                + String.format(getContext().getResources().getString(R.string.mention_format_text), tweet.user.screenName);
         Picasso.with(getContext())
                 .load(tweet.user.profileImageUrl)
                 .transform(new Transformation() {
@@ -163,13 +148,8 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
                     }
                 })
                 .into(userImageView);
-        SpannableString spannableString = new SpannableString(string);
-        int length = tweet.user.name.length();
-        spannableString.setSpan(new AbsoluteSizeSpan((int) size), 0, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        spannableString.setSpan(new AbsoluteSizeSpan((int) secSize), length + 1, string.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        spannableString.setSpan(new ForegroundColorSpan(color), 0, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        spannableString.setSpan(new ForegroundColorSpan(secColor), length + 1, string.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        nameTextView.setText(spannableString);
+
+        nameTextView.setText(TimeLineUtils.getSpannableStringOfName(getContext(), tweet.user.name, tweet.user.screenName));
         DateTime time = new DateTime(LocalTweet.twitterDateToEpoch(tweet.createdAt));
         DateTime now = new DateTime();
         // FIXME
