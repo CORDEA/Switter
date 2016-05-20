@@ -22,4 +22,7 @@
     <dimen name="main_list_timeline_image_height">167dp</dimen>
     <dimen name="main_list_timeline_image_top_margin">10dp</dimen>
     <dimen name="main_list_bottom_bar_vertical_margin">10dp</dimen>
+    <dimen name="post_text_min_height">64dp</dimen>
+    <dimen name="post_quote_retweet_layout_top_margin">16dp</dimen>
+    <dimen name="post_quote_retweet_layout_padding">5dp</dimen>
 </resources>

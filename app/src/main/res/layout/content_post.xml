@@ -13,38 +13,46 @@
     tools:context="jp.cordea.switter.PostActivity"
     tools:showIn="@layout/activity_post">
 
-    <EditText
-        android:id="@+id/edit_text"
-        android:gravity="top"
-        android:layout_marginBottom="?attr/actionBarSize"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-
     <LinearLayout
-        android:id="@+id/retweet"
-        android:visibility="gone"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="?attr/actionBarSize"
         android:orientation="vertical"
+        android:layout_marginBottom="?attr/actionBarSize"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/user_name"
-            android:layout_marginEnd="@dimen/tweet_post_date_width"
-            android:textSize="@dimen/main_list_common_text_size"
-            android:maxLines="1"
-            android:ellipsize="end"
+        <EditText
+            android:id="@+id/edit_text"
+            android:gravity="top"
+            android:background="@android:color/transparent"
             android:layout_width="match_parent"
+            android:minHeight="@dimen/post_text_min_height"
             android:layout_height="wrap_content"/>
 
-        <TextView
-            android:id="@+id/content"
-            android:textSize="@dimen/main_list_common_text_size"
-            android:layout_marginTop="@dimen/main_list_content_top_margin"
+        <LinearLayout
+            android:id="@+id/retweet"
+            android:layout_marginTop="@dimen/post_quote_retweet_layout_top_margin"
+            android:orientation="vertical"
+            android:background="@drawable/quote_retweet_outline"
+            android:padding="@dimen/post_quote_retweet_layout_padding"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content">
 
+            <TextView
+                android:id="@+id/user_name"
+                android:layout_marginEnd="@dimen/tweet_post_date_width"
+                android:textSize="@dimen/main_list_common_text_size"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/content"
+                android:textSize="@dimen/main_list_common_text_size"
+                android:layout_marginTop="@dimen/main_list_content_top_margin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
     </LinearLayout>
 
 </RelativeLayout>
