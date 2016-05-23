@@ -25,6 +25,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.Interval;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -41,7 +42,7 @@ import jp.cordea.switter.realm.LocalTweet;
 public class MainListAdapter extends ArrayAdapter<Tweet> {
 
     public void setTweets(List<Tweet> tweets) {
-        this.tweets = tweets;
+        this.tweets.addAll(tweets);
         Collections.sort(this.tweets, new Comparator<Tweet>() {
             @Override
             public int compare(Tweet tweet, Tweet t1) {
@@ -59,7 +60,11 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
         notifyDataSetChanged();
     }
 
-    private List<Tweet> tweets;
+    public void clearTweets() {
+        tweets.clear();
+    }
+
+    private List<Tweet> tweets = new ArrayList<>();
 
     private final int postRequestCode;
     private Activity activity;
@@ -83,12 +88,16 @@ public class MainListAdapter extends ArrayAdapter<Tweet> {
 
     @Override
     public int getCount() {
-        return tweets.size();
+        return tweets.size() + 1;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        View view = convertView == null ? LayoutInflater.from(getContext()).inflate(R.layout.main_list_item, null, false) : convertView;
+        if (tweets.size() == position) {
+            View view = LayoutInflater.from(getContext()).inflate(R.layout.main_list_last_item, null, false);
+            return view;
+        }
+        View view = LayoutInflater.from(getContext()).inflate(R.layout.main_list_item, null, false);
 
         ImageView userImageView = (ImageView) view.findViewById(R.id.user_thumbnail);
         TextView nameTextView = (TextView) view.findViewById(R.id.user_name);

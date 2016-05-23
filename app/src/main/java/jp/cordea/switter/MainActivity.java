@@ -9,6 +9,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.twitter.sdk.android.core.Callback;
@@ -43,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
     @Bind(R.id.list_view)
     ListView listView;
 
+    private Long maxId = null;
+
     private MainListAdapter adapter;
 
     @Override
@@ -64,9 +67,18 @@ public class MainActivity extends AppCompatActivity {
 
         adapter = new MainListAdapter(this, new ArrayList<Tweet>(), POST_REQUEST_CODE);
 
-        getTweets(adapter, 50);
+        getTweets(adapter, 50, null, true);
 
         listView.setAdapter(adapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                if (i == (adapter.getCount() - 1)) {
+                    getTweets(adapter, 50, maxId, false);
+                }
+            }
+        });
 
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -88,14 +100,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void refresh() {
-        getTweets(adapter, 50);
+        getTweets(adapter, 50, null, true);
         swipeRefreshLayout.setRefreshing(false);
     }
 
-    private void getTweets(final MainListAdapter adapter, int count) {
+    private void getTweets(final MainListAdapter adapter, int count, final Long id, final boolean isRefresh) {
         TwitterApiClient client = TwitterCore.getInstance().getApiClient();
         StatusesService service = client.getStatusesService();
-        service.homeTimeline(count, null, null, false, false, false, true, new Callback<List<Tweet>>() {
+        if (id != null) {
+            ++count;
+        }
+        service.homeTimeline(count, null, id, false, false, false, true, new Callback<List<Tweet>>() {
             @Override
             public void success(final Result<List<Tweet>> result) {
                 Realm realm = Realm.getDefaultInstance();
@@ -103,21 +118,35 @@ public class MainActivity extends AppCompatActivity {
                 List<Tweet> tweets = new ArrayList<>();
                 if (result.data.size() > 0) {
                     tweets.addAll(result.data);
-                    long minEpoch = LocalTweet.twitterDateToEpoch(result.data.get(0).createdAt);
+                    if (id != null) {
+                        tweets.remove(0);
+                    }
+                    Tweet firstTweet = result.data.get(0);
+                    long minEpoch = LocalTweet.twitterDateToEpoch(firstTweet.createdAt);
+                    long maxEpoch = LocalTweet.twitterDateToEpoch(firstTweet.createdAt);
+                    maxId = result.data.get(0).id;
                     for (int i = 0; i < result.data.size(); i++) {
                         Tweet tweet = result.data.get(i);
                         long epoch = LocalTweet.twitterDateToEpoch(tweet.createdAt);
                         if (minEpoch > epoch) {
                             minEpoch = epoch;
+                            maxId = tweet.id;
+                        }
+                        if (maxEpoch < epoch) {
+                            maxEpoch = epoch;
                         }
                     }
                     for (int i = 0; i < localTweets.size(); i++) {
-                        if (minEpoch <= LocalTweet.twitterDateToEpoch(localTweets.get(i).getCreatedAt())) {
+                        long epoch = LocalTweet.twitterDateToEpoch(localTweets.get(i).getCreatedAt());
+                        if (minEpoch <= epoch && maxEpoch >= epoch) {
                             tweets.add(localTweets.get(i).toTweet());
                         }
                     }
                 }
                 realm.close();
+                if (isRefresh) {
+                    adapter.clearTweets();
+                }
                 adapter.setTweets(tweets);
             }
 

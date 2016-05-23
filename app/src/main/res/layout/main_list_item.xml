@@ -83,9 +83,7 @@
             android:visibility="gone"
             android:layout_marginTop="@dimen/main_list_timeline_image_top_margin"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/main_list_timeline_image_height">
-
-        </jp.cordea.switter.TimelineImageView>
+            android:layout_height="@dimen/main_list_timeline_image_height" />
 
         <LinearLayout
             android:id="@+id/bottom_bar"
