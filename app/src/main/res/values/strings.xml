@@ -13,4 +13,5 @@
         <item>リツイート</item>
         <item>引用リツイート</item>
     </string-array>
+    <string name="load_more">もっと読み込む…</string>
 </resources>
